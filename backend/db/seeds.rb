@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 require 'factory_bot_rails'
 
->>>>>>> upstream/main
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
@@ -16,10 +13,6 @@ require 'factory_bot_rails'
 # Initialize the review counter
 ReviewCounter.create(count: 0)
 
-<<<<<<< HEAD
-# Populate the DB with fake data
-# Rake::Task['db:populate_fake_data'].invoke
-=======
 if Rails.env.development?
 
   # Crear países
@@ -59,4 +52,3 @@ if Rails.env.development?
   end
 
 end
->>>>>>> upstream/main
