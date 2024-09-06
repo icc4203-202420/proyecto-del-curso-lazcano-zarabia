@@ -62,3 +62,6 @@ gem "devise-jwt"
 gem 'jsonapi-serializer'
 gem 'pry', '~> 0.14.2'
 gem 'pundit'
+
+#Esta gema es para la coneccion del front y back end, por tener puertos separados
+gem "rack-cors"
