@@ -1,65 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { TextField, List, ListItem, ListItemText, Container, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import DataFetcher from './DataFetcher';
 
 function BeersIndex() {
-  const [beers, setBeers] = useState([]); // Estado para almacenar las cervezas
-  const [searchTerm, setSearchTerm] = useState(''); // Estado para el término de búsqueda
+  const [beers, setBeers] = useState([]);  // Inicializamos beers como un array vacío
 
-  const fetchBeers = async () => {
-    try {
-      const response = await fetch('/api/v1/beers.json');
-      const data = await response.json();
-      setBeers(data.beers || []); // Asegúrate de que el estado se actualice correctamente
-    } catch (error) {
-      console.error('Error fetching beers:', error);
-      setBeers([]); // En caso de error, asegúrate de que el estado sea un array vacío
-    }
+  // Función que maneja la búsqueda
+  const handleSearch = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    setBeers(beers.filter(beer => beer.name.toLowerCase().includes(searchTerm)));
   };
 
-  useEffect(() => {
-    fetchBeers();
-  }, []); // Este efecto solo debe ejecutarse una vez
-
-  const filteredBeers = beers.filter(beer =>
-    beer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Función que maneja los datos recibidos del DataFetcher
+  const handleDataFetched = (data) => {
+    setBeers(data.beers);  // Aquí extraemos el array de cervezas del objeto de respuesta
+  };
 
   return (
-    <Container style={{ marginTop: '20px' }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Lista de Cervezas
-      </Typography>
-      <TextField
-        label="Buscar Cervezas"
-        variant="outlined"
-        fullWidth
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        placeholder="Escribe el nombre de la cerveza"
-        style={{ marginBottom: '20px' }}
+    <div>
+      <h1>Lista de Cervezas</h1>
+      <input 
+        type="text" 
+        placeholder="Buscar cervezas..." 
+        onChange={handleSearch}
       />
-      <List>
-        {filteredBeers.length > 0 ? (
-          filteredBeers.map(beer => (
-            <ListItem key={beer.id}>
-              <ListItemText
-                primary={beer.name}
-                secondary={beer.description || 'Sin descripción'}
-              />
-            </ListItem>
-          ))
-        ) : (
-          <Typography variant="body1">
-            No se encontraron cervezas que coincidan con la búsqueda.
-          </Typography>
-        )}
-      </List>
-    </Container>
+      <ul>
+        {/* Verificamos que beers sea un array antes de aplicar .map */}
+        {Array.isArray(beers) && beers.map(beer => (
+          <li key={beer.id}>{beer.name}</li>
+        ))}
+      </ul>
+      <DataFetcher endpoint="http://127.0.0.1:3001/api/v1/beers" onDataFetched={handleDataFetched} />
+    </div>
   );
 }
 
 export default BeersIndex;
-
-
-
-
