@@ -1,13 +1,14 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
-  before_action :set_user, only: [:show, :update]  
-  
+  before_action :set_user, only: [:show, :update]
+
   def index
-    @users = User.includes(:reviews, :address).all   
+    @users = User.includes(:reviews, :address).all
+    render json: { users: @users }, status: :ok
   end
 
   def show
-  
+
   end
 
   def create
@@ -37,7 +38,7 @@ class API::V1::UsersController < ApplicationController
   def user_params
     params.fetch(:user, {}).
         permit(:id, :first_name, :last_name, :email, :age,
-            { address_attributes: [:id, :line1, :line2, :city, :country, :country_id, 
+            { address_attributes: [:id, :line1, :line2, :city, :country, :country_id,
               country_attributes: [:id, :name]],
               reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
             })

@@ -11,7 +11,7 @@ require 'factory_bot_rails'
 #   end
 
 # Initialize the review counter
-ReviewCounter.create(count: 0)
+ReviewCounter.create(count: 10)
 
 if Rails.env.development?
 
@@ -50,5 +50,19 @@ if Rails.env.development?
       FactoryBot.create(:attendance, user: user, event: event, checked_in: [true, false].sample)
     end
   end
+
+  Review.create!([
+    { text: "Cerveza equilibrada, refrescante y suave. Perfecta para cualquier ocasión.", rating: 4.5, user_id: 1, beer_id: 1 },
+    { text: "Me encanta su aroma frutal. Ideal para disfrutar en un día caluroso.", rating: 4.0, user_id: 2, beer_id: 1 },
+    { text: "El sabor es bueno, pero un poco más amargo de lo que prefiero.", rating: 3.5, user_id: 3, beer_id: 1 },
+    { text: "Una excelente cerveza, el lúpulo y la malta están perfectamente balanceados.", rating: 5.0, user_id: 4, beer_id: 1 },
+    { text: "Buena cerveza, aunque me hubiera gustado un poco más de cuerpo.", rating: 3.8, user_id: 5, beer_id: 1 },
+    { text: "Decente, pero prefiero cervezas con más notas cítricas.", rating: 3.2, user_id: 6, beer_id: 1 },
+    { text: "Sabor excelente, la mezcla de malta y lúpulo es perfecta.", rating: 4.8, user_id: 7, beer_id: 1 },
+    { text: "Buena cerveza, aunque el final es un poco amargo para mi gusto.", rating: 4.2, user_id: 8, beer_id: 1 },
+    { text: "El sabor es demasiado fuerte para mí, prefiero algo más ligero.", rating: 2.5, user_id: 9, beer_id: 1 },
+    { text: "Cerveza refrescante, con un toque suave, ideal para cualquier ocasión.", rating: 4.7, user_id: 10, beer_id: 1 }
+  ])
+
 
 end

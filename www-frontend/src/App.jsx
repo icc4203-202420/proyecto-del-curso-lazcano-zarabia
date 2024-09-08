@@ -5,6 +5,8 @@ import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIc
 import logo from './assets/Logo.png';
 import BeersIndex from './components/BeersIndex';
 import BarsIndex from './components/BarsIndex.jsx';
+import BeerShow from './components/BeerShow.jsx'
+import BeerReviewIndex from './components/BeerReviewIndex.jsx';
 
 const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
 const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
@@ -53,7 +55,7 @@ function App() {
     isError: false,
   });
 
-
+  //Aqui es donde se fetch los datos de las beers
   useEffect(() => {
     dispatch({ type: 'BEERS_FETCH_INIT' });
     fetch(API_BEERS)
@@ -135,38 +137,45 @@ function App() {
 
         <hr />
 
-        {state.isError && <p>Something went wrong ...</p>}
+        {/* Verificar si hay algo en el campo de búsqueda */}
+        {searchTerm ? (
+          <>
+            <h2>Beers</h2>
+            {state.isLoadingBeers ? (
+              <p>Loading beers...</p>
+            ) : (
+              <List list={filteredBeers} type="beer" />
+            )}
 
-        <h2>Beers</h2>
-        {state.isLoadingBeers ? (
-          <p>Loading beers...</p>
-        ) : (
-          <List list={filteredBeers} type="beer" />
-        )}
+            <h2>Bars</h2>
+            {state.isLoadingBars ? (
+              <p>Loading bars...</p>
+            ) : (
+              <List list={filteredBars} type="bar" />
+            )}
 
-        <h2>Bars</h2>
-        {state.isLoadingBars ? (
-          <p>Loading bars...</p>
+            <h2>Events</h2>
+            {state.isLoadingEvents ? (
+              <p>Loading events...</p>
+            ) : (
+              Object.keys(filteredEventsByBar).map((barId) => (
+                <div key={barId}>
+                  <h3>Events for Bar {barId}</h3>
+                  <List list={filteredEventsByBar[barId]} type="event" />
+                </div>
+              ))
+            )}
+          </>
         ) : (
-          <List list={filteredBars} type="bar" />
-        )}
-
-        <h2>Events</h2>
-        {state.isLoadingEvents ? (
-          <p>Loading events...</p>
-        ) : (
-          Object.keys(filteredEventsByBar).map((barId) => (
-            <div key={barId}>
-              <h3>Events for Bar {barId}</h3>
-              <List list={filteredEventsByBar[barId]} type="event" />
-            </div>
-          ))
+          <p></p>
         )}
 
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
             <Route path="/" element={<div><h2>Inicio</h2></div>} />
             <Route path="/beers" element={<BeersIndex />} />
+            <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
+            <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars" element={<BarsIndex />} />
           </Routes>
         </div>
@@ -195,9 +204,11 @@ const List = ({ list, type }) => (
 const Item = ({ item, type }) => (
   <li>
     {type === 'beer' ? (
-      <span>{item.name} - {item.style}</span>
+      <span>
+        <Link to={`/beers/${item.id}`}> {item.name} </Link> - {item.style}
+      </span>
     ) : type === 'bar' ? (
-      <span>{item.name} - {item.latitude}, {item.longitude}</span>
+      <span>{item.name}</span>
     ) : (
       <span>{item.name}</span> 
     )}

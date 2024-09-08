@@ -3,6 +3,12 @@ class API::V1::ReviewsController < ApplicationController
   before_action :set_user, only: [:index, :create]
   before_action :set_review, only: [:show, :update, :destroy]
 
+  def index_by_beer
+    beer = Beer.find(params[:beer_id]) # Encuentra la cerveza por su ID
+    reviews = beer.reviews # Obtiene todas las reseñas asociadas a esa cerveza
+    render json: reviews # Devuelve las reseñas en formato JSON
+  end
+
   def index
     @reviews = Review.where(user: @user)
     render json: { reviews: @reviews }, status: :ok
@@ -46,7 +52,7 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def set_user
-    @user = User.find(params[:user_id]) 
+    @user = User.find(params[:user_id])
   end
 
   def review_params
