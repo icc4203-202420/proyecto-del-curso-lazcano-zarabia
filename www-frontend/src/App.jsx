@@ -6,11 +6,9 @@ import logo from './assets/Logo.png';
 import BeersIndex from './components/BeersIndex';
 import BarsIndex from './components/BarsIndex.jsx';
 
-// Definir los endpoints de las APIs
 const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
 const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
 
-// Reducer para manejar los estados de carga, éxito y error
 const dataReducer = (state, action) => {
   switch (action.type) {
     case 'BEERS_FETCH_INIT':
@@ -27,6 +25,17 @@ const dataReducer = (state, action) => {
     case 'BARS_FETCH_FAILURE':
       return { ...state, isLoadingBars: false, isError: true };
 
+    case 'EVENTS_FETCH_INIT':
+      return { ...state, isLoadingEvents: true, isError: false };
+    case 'EVENTS_FETCH_SUCCESS':
+      return {
+        ...state,
+        isLoadingEvents: false,
+        events: { ...state.events, [action.barId]: action.payload }, // Agregar eventos al estado
+      };
+    case 'EVENTS_FETCH_FAILURE':
+      return { ...state, isLoadingEvents: false, isError: true };
+
     default:
       throw new Error();
   }
@@ -37,12 +46,14 @@ function App() {
   const [state, dispatch] = useReducer(dataReducer, {
     beers: [],
     bars: [],
+    events: {},
     isLoadingBeers: false,
     isLoadingBars: false,
+    isLoadingEvents: false,
     isError: false,
   });
 
-  // Fetch de datos de cervezas
+
   useEffect(() => {
     dispatch({ type: 'BEERS_FETCH_INIT' });
     fetch(API_BEERS)
@@ -55,13 +66,23 @@ function App() {
       });
   }, []);
 
-  // Fetch de datos de bares
   useEffect(() => {
     dispatch({ type: 'BARS_FETCH_INIT' });
     fetch(API_BARS)
       .then((response) => response.json())
       .then((result) => {
         dispatch({ type: 'BARS_FETCH_SUCCESS', payload: result.bars });
+
+        result.bars.forEach((bar) => {
+          fetch(`http://127.0.0.1:3001/api/v1/bars/${bar.id}/events`)
+            .then((response) => response.json())
+            .then((eventsResult) => {
+              dispatch({ type: 'EVENTS_FETCH_SUCCESS', barId: bar.id, payload: eventsResult });
+            })
+            .catch(() => {
+              dispatch({ type: 'EVENTS_FETCH_FAILURE' });
+            });
+        });
       })
       .catch(() => {
         dispatch({ type: 'BARS_FETCH_FAILURE' });
@@ -72,15 +93,24 @@ function App() {
     setSearchTerm(event.target.value);
   };
 
-  // Filtrar cervezas basadas en el término de búsqueda
   const filteredBeers = state.beers.filter((beer) =>
     beer.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Filtrar bares basados en el término de búsqueda
   const filteredBars = state.bars.filter((bar) =>
     bar.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredEventsByBar = Object.keys(state.events).reduce((acc, barId) => {
+    const eventsForBar = state.events[barId] || []; 
+    const filteredEvents = eventsForBar.filter((event) =>
+      event.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    if (filteredEvents.length > 0) {
+      acc[barId] = filteredEvents;
+    }
+    return acc;
+  }, {});
 
   return (
     <Router>
@@ -121,6 +151,18 @@ function App() {
           <List list={filteredBars} type="bar" />
         )}
 
+        <h2>Events</h2>
+        {state.isLoadingEvents ? (
+          <p>Loading events...</p>
+        ) : (
+          Object.keys(filteredEventsByBar).map((barId) => (
+            <div key={barId}>
+              <h3>Events for Bar {barId}</h3>
+              <List list={filteredEventsByBar[barId]} type="event" />
+            </div>
+          ))
+        )}
+
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
             <Route path="/beers" element={<BeersIndex />} />
@@ -153,8 +195,10 @@ const Item = ({ item, type }) => (
   <li>
     {type === 'beer' ? (
       <span>{item.name} - {item.style}</span>
+    ) : type === 'bar' ? (
+      <span>{item.name} - {item.latitude}, {item.longitude}</span>
     ) : (
-      <span>{item.name}</span>
+      <span>{item.name}</span> 
     )}
   </li>
 );

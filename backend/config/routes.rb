@@ -21,14 +21,14 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :bars
-        resources :events, only: [:index]
+      resources :bars do
+        resources :events, only: [:index], controller: 'events', action: :index_by_bar
+      end
       resources :beers, only: [:index]
       resources :users do
         resources :reviews, only: [:index]
       end
-
-
+      resources :events, only: [:show, :create, :update, :destroy]
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
     end
   end
