@@ -1,20 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import { AppBar, Toolbar, IconButton, InputBase, BottomNavigation, BottomNavigationAction, Paper, ListItemText, Drawer, ListItemIcon, ListItem } from '@mui/material';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIcon, FastfoodIcon } from './components/common/icons.js';
 import logo from './assets/Logo.png';
-import BeersIndex from './components/BeersIndex'; // Importa el componente BeersIndex
+import BeersIndex from './components/BeersIndex';
 import BarsIndex from './components/BarsIndex.jsx';
 
+// Definir los endpoints de las APIs
+const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
+const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
+
+// Reducer para manejar los estados de carga, éxito y error
+const dataReducer = (state, action) => {
+  switch (action.type) {
+    case 'BEERS_FETCH_INIT':
+      return { ...state, isLoadingBeers: true, isError: false };
+    case 'BEERS_FETCH_SUCCESS':
+      return { ...state, isLoadingBeers: false, beers: action.payload };
+    case 'BEERS_FETCH_FAILURE':
+      return { ...state, isLoadingBeers: false, isError: true };
+
+    case 'BARS_FETCH_INIT':
+      return { ...state, isLoadingBars: true, isError: false };
+    case 'BARS_FETCH_SUCCESS':
+      return { ...state, isLoadingBars: false, bars: action.payload };
+    case 'BARS_FETCH_FAILURE':
+      return { ...state, isLoadingBars: false, isError: true };
+
+    default:
+      throw new Error();
+  }
+};
+
 function App() {
-  const [drawer, setDrawer] = useState(false);
-  const toggleDrawer = () => {
-    setDrawer(!drawer);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [state, dispatch] = useReducer(dataReducer, {
+    beers: [],
+    bars: [],
+    isLoadingBeers: false,
+    isLoadingBars: false,
+    isError: false,
+  });
+
+  // Fetch de datos de cervezas
+  useEffect(() => {
+    dispatch({ type: 'BEERS_FETCH_INIT' });
+    fetch(API_BEERS)
+      .then((response) => response.json())
+      .then((result) => {
+        dispatch({ type: 'BEERS_FETCH_SUCCESS', payload: result.beers });
+      })
+      .catch(() => {
+        dispatch({ type: 'BEERS_FETCH_FAILURE' });
+      });
+  }, []);
+
+  // Fetch de datos de bares
+  useEffect(() => {
+    dispatch({ type: 'BARS_FETCH_INIT' });
+    fetch(API_BARS)
+      .then((response) => response.json())
+      .then((result) => {
+        dispatch({ type: 'BARS_FETCH_SUCCESS', payload: result.bars });
+      })
+      .catch(() => {
+        dispatch({ type: 'BARS_FETCH_FAILURE' });
+      });
+  }, []);
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
   };
+
+  // Filtrar cervezas basadas en el término de búsqueda
+  const filteredBeers = state.beers.filter((beer) =>
+    beer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filtrar bares basados en el término de búsqueda
+  const filteredBars = state.bars.filter((bar) =>
+    bar.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Router>
-      <div style={{ height: '100vh', backgroundImage: `url('/path/to/static/map/image.jpg')`, backgroundSize: 'cover' }}>
+      <div style={{ height: '100vh', backgroundSize: 'cover' }}>
         <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
           <Toolbar>
             <IconButton edge="start" color="inherit" aria-label="menu">
@@ -24,12 +94,32 @@ function App() {
               placeholder="Buscar..."
               inputProps={{ 'aria-label': 'buscar' }}
               style={{ marginLeft: 8, flex: 1, backgroundColor: 'white', borderRadius: '20px', padding: '0 10px' }}
+              value={searchTerm}
+              onChange={handleSearch}
             />
             <IconButton type="submit" color="inherit" aria-label="search">
               <SearchIcon />
             </IconButton>
           </Toolbar>
         </AppBar>
+
+        <hr />
+
+        {state.isError && <p>Something went wrong ...</p>}
+
+        <h2>Beers</h2>
+        {state.isLoadingBeers ? (
+          <p>Loading beers...</p>
+        ) : (
+          <List list={filteredBeers} type="beer" />
+        )}
+
+        <h2>Bars</h2>
+        {state.isLoadingBars ? (
+          <p>Loading bars...</p>
+        ) : (
+          <List list={filteredBars} type="bar" />
+        )}
 
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
@@ -43,36 +133,30 @@ function App() {
             <BottomNavigationAction label="Favoritos" icon={<FavoriteIcon />} />
             <BottomNavigationAction component={Link} to="/" label="Inicio" icon={<HomeIcon />} />
             <BottomNavigationAction label="Perfil" icon={<PersonIcon />} />
-            <BottomNavigationAction label="Search" icon={<DehazeIcon />} onClick={toggleDrawer} />
+            <BottomNavigationAction label="Search" icon={<DehazeIcon />} />
           </BottomNavigation>
         </Paper>
-
-        <Drawer
-          anchor="right"
-          variant="temporary"
-          open={drawer}
-          onClose={toggleDrawer}
-          ModalProps={{
-            keepMounted: true, //Better performance on mobile
-          }}
-        >
-          <ListItem button="Beers" component={Link} to="/beers" onClick={toggleDrawer}>
-            <ListItemIcon>
-              <SportsBarIcon />
-            </ListItemIcon>
-            <ListItemText primary="Beers" />
-          </ListItem>
-
-          <ListItem button="Bars" component={Link} to="/bars" onClick={toggleDrawer}>
-            <ListItemIcon>
-              <FastfoodIcon />
-            </ListItemIcon>
-            <ListItemText primary="Bars" />
-          </ListItem>
-        </Drawer>
       </div>
     </Router>
   );
 }
+
+const List = ({ list, type }) => (
+  <ul>
+    {list.map((item) => (
+      <Item key={item.id} item={item} type={type} />
+    ))}
+  </ul>
+);
+
+const Item = ({ item, type }) => (
+  <li>
+    {type === 'beer' ? (
+      <span>{item.name} - {item.style}</span>
+    ) : (
+      <span>{item.name}</span>
+    )}
+  </li>
+);
 
 export default App;

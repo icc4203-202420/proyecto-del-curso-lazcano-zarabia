@@ -1,11 +1,11 @@
 class Api::V1::EventsController < ApplicationController
     before_action :authenticate_user!, only: [:create, :update, :destroy]
     before_action :set_event, only: [:show, :update, :destroy]
-  
+
     def show
       render json: @event
     end
-  
+
     def create
       @event = Event.new(event_params)
       if @event.save
@@ -14,7 +14,7 @@ class Api::V1::EventsController < ApplicationController
         render json: @event.errors, status: :unprocessable_entity
       end
     end
-  
+
     def update
       if @event.update(event_params)
         render json: @event
@@ -22,20 +22,19 @@ class Api::V1::EventsController < ApplicationController
         render json: @event.errors, status: :unprocessable_entity
       end
     end
-  
+
     def destroy
       @event.destroy
       head :no_content
     end
-  
+
     private
-  
+
     def set_event
       @event = Event.find(params[:id])
     end
-  
+
     def event_params
       params.require(:event).permit(:name, :description, :date, :flyer)
     end
   end
-  
