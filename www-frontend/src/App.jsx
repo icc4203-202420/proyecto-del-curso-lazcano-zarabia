@@ -165,6 +165,7 @@ function App() {
 
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
+            <Route path="/" element={<div><h2>Inicio</h2></div>} />
             <Route path="/beers" element={<BeersIndex />} />
             <Route path="/bars" element={<BarsIndex />} />
           </Routes>
