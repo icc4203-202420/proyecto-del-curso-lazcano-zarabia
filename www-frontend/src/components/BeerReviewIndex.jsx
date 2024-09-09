@@ -14,7 +14,6 @@ const BeerReviewIndex = () => {
   const [selectedUserId, setSelectedUserId] = useState(''); 
 
   useEffect(() => {
-    // Fetch de las reseñas
     const fetchReviews = async () => {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/v1/beers/${id}/reviews`);
@@ -29,8 +28,7 @@ const BeerReviewIndex = () => {
         setIsLoading(false);
       }
     };
-
-    // Fetch de los usuarios
+  
     const fetchUsers = async () => {
       try {
         const response = await fetch('http://127.0.0.1:3001/api/v1/users');
@@ -38,12 +36,12 @@ const BeerReviewIndex = () => {
           throw new Error('Failed to fetch users');
         }
         const result = await response.json();
-        setUsers(result.users); // Acceder al array dentro de "users"
+        setUsers(result.users);
       } catch (error) {
         setIsError(true);
       }
     };
-
+  
     fetchReviews();
     fetchUsers();
   }, [id]);
@@ -151,14 +149,20 @@ const BeerReviewIndex = () => {
       </form>
 
       <h2>Reviews for Beer {id}</h2>
-      <ul>
-        {reviews.map((review) => (
-          <li key={review.id}>
-            <p>Rating: {review.rating}</p>
-            <p>Comment: {review.text}</p>
-          </li>
-        ))}
-      </ul>
+      
+        <ul>
+            {reviews.map((review) => {
+                const user = users.find((u) => u.id === review.user_id); 
+                return (
+                    <li key={review.id}>
+                    <p>Rating: {review.rating}</p>
+                    <p>User: {user ? user.handle : 'Usuario desconocido'}</p>
+                    <p>{review.text}</p>
+                    </li>
+                );
+            })}
+        </ul>
+
     </div>
   );
 };

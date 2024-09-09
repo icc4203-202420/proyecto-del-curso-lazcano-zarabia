@@ -2,9 +2,8 @@ class API::V1::EventsController < ApplicationController
   before_action :authenticate_user!, only: [:create, :update, :destroy]
   before_action :set_event, only: [:show, :update, :destroy]
 
-  # Nueva acción para obtener los eventos de un bar específico
   def index_by_bar
-    @events = Event.where(bar_id: params[:bar_id]) # Filtrar eventos por bar_id
+    @events = Event.where(bar_id: params[:bar_id])
     render json: @events
   end
 
@@ -41,6 +40,6 @@ class API::V1::EventsController < ApplicationController
   end
 
   def event_params
-    params.require(:event).permit(:name, :description, :date, :flyer, :bar_id) # Asegúrate de permitir bar_id
+    params.require(:event).permit(:name, :description, :date, :flyer, :bar_id)
   end
 end

@@ -33,7 +33,7 @@ const dataReducer = (state, action) => {
       return {
         ...state,
         isLoadingEvents: false,
-        events: { ...state.events, [action.barId]: action.payload }, // Agregar eventos al estado
+        events: { ...state.events, [action.barId]: action.payload }, 
       };
     case 'EVENTS_FETCH_FAILURE':
       return { ...state, isLoadingEvents: false, isError: true };
@@ -55,7 +55,6 @@ function App() {
     isError: false,
   });
 
-  //Aqui es donde se fetch los datos de las beers
   useEffect(() => {
     dispatch({ type: 'BEERS_FETCH_INIT' });
     fetch(API_BEERS)
@@ -137,7 +136,6 @@ function App() {
 
         <hr />
 
-        {/* Verificar si hay algo en el campo de búsqueda */}
         {searchTerm ? (
           <>
             <h2>Beers</h2>
