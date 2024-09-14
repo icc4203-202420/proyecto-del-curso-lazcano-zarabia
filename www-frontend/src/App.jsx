@@ -1,15 +1,22 @@
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, useRef } from 'react';
 import { AppBar, Toolbar, IconButton, InputBase, BottomNavigation, BottomNavigationAction, Paper, ListItemText, Drawer, ListItemIcon, ListItem } from '@mui/material';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIcon, FastfoodIcon } from './components/common/icons.js';
 import logo from './assets/Logo.png';
-import BeersIndex from './components/BeersIndex';
-import BarsIndex from './components/BarsIndex.jsx';
+import Home from './components/Home.jsx';
 import BeerShow from './components/BeerShow.jsx'
+import BarShow from './components/BarShow.jsx'
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
+//Las siguientes importanciones son para el mapa
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { useLoadGMapsLibraries } from './hooks/useLoadGMapsLibraries';
+import { MAPS_LIBRARY, MARKER_LIBRARY, ControlPosition } from './constants';
 
 const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
 const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
+
+const MAP_CENTER = { lat: -31.56391, lng: 147.154312 };
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const dataReducer = (state, action) => {
   switch (action.type) {
@@ -94,25 +101,32 @@ function App() {
     setSearchTerm(event.target.value);
   };
 
-  const filteredBeers = state.beers.filter((beer) =>
-    beer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredBars = state.bars.filter((bar) =>
-    bar.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredEventsByBar = Object.keys(state.events).reduce((acc, barId) => {
-    const eventsForBar = state.events[barId] || []; 
-    const filteredEvents = eventsForBar.filter((event) =>
-      event.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBeers = searchTerm.toLowerCase() === 'beers'
+  ? state.beers
+  : state.beers.filter((beer) =>
+      beer.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    if (filteredEvents.length > 0) {
-      acc[barId] = filteredEvents;
-    }
-    return acc;
-  }, {});
 
+const filteredBars = searchTerm.toLowerCase() === 'bars'
+  ? state.bars
+  : state.bars.filter((bar) =>
+      bar.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
+  ? state.events
+  : Object.keys(state.events).reduce((filtered, barId) => {
+      const filteredEvents = state.events[barId].filter((event) =>
+        event.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      if (filteredEvents.length > 0) {
+        filtered[barId] = filteredEvents;
+      }
+      return filtered;
+    }, {});
+
+
+  
   return (
     <Router>
       <div style={{ height: '100vh', backgroundSize: 'cover' }}>
@@ -168,13 +182,14 @@ function App() {
           <p></p>
         )}
 
+      
+
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
-            <Route path="/" element={<div><h2>Inicio</h2></div>} />
-            <Route path="/beers" element={<BeersIndex />} />
+            <Route path="/" element={<Home/>} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
-            <Route path="/bars" element={<BarsIndex />} />
+            <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
           </Routes>
         </div>
 
@@ -206,7 +221,9 @@ const Item = ({ item, type }) => (
         <Link to={`/beers/${item.id}`}> {item.name} </Link> - {item.style}
       </span>
     ) : type === 'bar' ? (
-      <span>{item.name}</span>
+      <span>
+        <Link to={`/bars/${item.id}`}> {item.name} </Link> {item.style}
+      </span>
     ) : (
       <span>{item.name}</span> 
     )}
