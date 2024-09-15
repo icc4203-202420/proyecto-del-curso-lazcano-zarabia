@@ -28,9 +28,11 @@ Rails.application.routes.draw do
         resources :reviews, only: [:index, :create]
       end
       resources :users do
-        resources :reviews, only: [:index, :create]
+        resources :reviews, only: [:index,:show, :create]
       end
-      resources :events, only: [:show, :create, :update, :destroy]
+      resources :events, only: [:show, :create, :update, :destroy] do
+        get 'attendances', to: 'attendances#index_by_event'
+      end
       resources :addresses
     end
   end

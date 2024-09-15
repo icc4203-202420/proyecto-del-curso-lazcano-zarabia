@@ -8,7 +8,11 @@ class API::V1::UsersController < ApplicationController
   end
 
   def show
-
+    if @user
+      render json: @user, status: :ok
+    else
+      render json: { error: "Usuario no encontrado" }, status: :not_found
+    end
   end
 
   def create
@@ -21,7 +25,6 @@ class API::V1::UsersController < ApplicationController
   end
 
   def update
-    #byebug
     if @user.update(user_params)
       render :show, status: :ok, location: api_v1_users_path(@user)
     else
