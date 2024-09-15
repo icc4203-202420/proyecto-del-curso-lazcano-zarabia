@@ -6,6 +6,7 @@ import logo from './assets/Logo.png';
 import Home from './components/Home.jsx';
 import BeerShow from './components/BeerShow.jsx'
 import BarShow from './components/BarShow.jsx'
+import EventShow from './components/EventShow.jsx'
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
 //Las siguientes importanciones son para el mapa
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
@@ -14,9 +15,6 @@ import { MAPS_LIBRARY, MARKER_LIBRARY, ControlPosition } from './constants';
 
 const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
 const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
-
-const MAP_CENTER = { lat: -31.56391, lng: 147.154312 };
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const dataReducer = (state, action) => {
   switch (action.type) {
@@ -62,6 +60,9 @@ function App() {
     isError: false,
   });
 
+  const [cities, setCities] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
+
   useEffect(() => {
     dispatch({ type: 'BEERS_FETCH_INIT' });
     fetch(API_BEERS)
@@ -74,13 +75,29 @@ function App() {
       });
   }, []);
 
+
+  //Fetch de los datos de bares
   useEffect(() => {
     dispatch({ type: 'BARS_FETCH_INIT' });
+  
     fetch(API_BARS)
       .then((response) => response.json())
       .then((result) => {
         dispatch({ type: 'BARS_FETCH_SUCCESS', payload: result.bars });
+  
+        // Extrae las ubicaciones de los bares y guárdalas en cities
+        const barLocations = result.bars.map((bar) => ({
+          name: bar.name,
+          position: {
+            lat: bar.latitude, // Asegúrate de que estos campos existan en los datos de bar
+            lng: bar.longitude,
+          },
+        }));
+  
+        setCities(barLocations); // Guarda las ubicaciones en el estado cities
+        setFilteredCities(barLocations);
 
+        // Continuar obteniendo los eventos para cada bar
         result.bars.forEach((bar) => {
           fetch(`http://127.0.0.1:3001/api/v1/bars/${bar.id}/events`)
             .then((response) => response.json())
@@ -96,6 +113,9 @@ function App() {
         dispatch({ type: 'BARS_FETCH_FAILURE' });
       });
   }, []);
+
+  
+  
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -186,10 +206,11 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
 
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
-            <Route path="/" element={<Home/>} />
+            <Route path="/" element={<Home cities={cities} filteredCities={filteredCities}/>} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
+            <Route path="/bars/:id_bar/events/:id_event" element={<EventShow />} />
           </Routes>
         </div>
 
@@ -229,5 +250,6 @@ const Item = ({ item, type }) => (
     )}
   </li>
 );
+
 
 export default App;

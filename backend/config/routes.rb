@@ -22,7 +22,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :bars do
-        resources :events, only: [:index], controller: 'events', action: :index_by_bar
+        resources :events, only: [:index, :show], controller: 'events', action: :index_by_bar
       end
       resources :beers do
         resources :reviews, only: [:index, :create]
@@ -31,6 +31,7 @@ Rails.application.routes.draw do
         resources :reviews, only: [:index, :create]
       end
       resources :events, only: [:show, :create, :update, :destroy]
+      resources :addresses
     end
   end
 

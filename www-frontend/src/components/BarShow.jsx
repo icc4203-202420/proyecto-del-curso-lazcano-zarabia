@@ -49,7 +49,7 @@ const BarShow = ({ bars }) => {
         {events.length ? (
           events.map((event) => (
             <li key={event.id}>
-              <Link to={`/events/${event.id}`}>{event.name}</Link>
+              <Link to={`/bars/${id}/events/${event.id}`}>{event.name}</Link>
             </li>
           ))
         ) : (

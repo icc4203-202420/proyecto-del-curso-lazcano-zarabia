@@ -44,13 +44,6 @@ if Rails.env.development?
     FactoryBot.create(:friendship, user: user_pair[0], friend: user_pair[1], bar: bars.sample)
   end
 
-  # Crear attendances (asistencia) de usuarios a eventos
-  users.each do |user|
-    events.sample(rand(1..3)).each do |event|
-      FactoryBot.create(:attendance, user: user, event: event, checked_in: [true, false].sample)
-    end
-  end
-
   Review.create!([
     { text: "Cerveza equilibrada, refrescante y suave. Perfecta para cualquier ocasión.", rating: 4.5, user_id: 1, beer_id: 1 },
     { text: "Me encanta su aroma frutal. Ideal para disfrutar en un día caluroso.", rating: 4.0, user_id: 2, beer_id: 1 },
@@ -64,5 +57,150 @@ if Rails.env.development?
     { text: "Cerveza refrescante, con un toque suave, ideal para cualquier ocasión.", rating: 4.7, user_id: 10, beer_id: 1 }
   ])
 
+  Event.create([{
+    name: "Fiesta Cervecera",
+    description: "Una fiesta dedicada a los amantes de la cerveza.",
+    date: DateTime.now + 1.day,
+    bar_id: 1,
+    start_date: DateTime.now + 1.day + 2.hours,
+    end_date: DateTime.now + 1.day + 5.hours
+  },{
+    name: "Karaoke Night",
+    description: "Una noche de diversión y música en vivo.",
+    date: DateTime.now + 2.days,
+    bar_id: 1,
+    start_date: DateTime.now + 2.days + 3.hours,
+    end_date: DateTime.now + 2.days + 6.hours
+  },{
+    name: "Trivia Night",
+    description: "Compite en nuestro evento de trivia y gana premios.",
+    date: DateTime.now + 3.days,
+    bar_id: 1,
+    start_date: DateTime.now + 3.days + 2.hours,
+    end_date: DateTime.now + 3.days + 4.hours
+  },{
+    name: "Cata de Cervezas",
+    description: "Prueba cervezas artesanales exclusivas.",
+    date: DateTime.now + 4.days,
+    bar_id: 1,
+    start_date: DateTime.now + 4.days + 1.hour,
+    end_date: DateTime.now + 4.days + 3.hours
+  },{
+    name: "Noche de Jazz",
+    description: "Disfruta de música en vivo con nuestras mejores cervezas.",
+    date: DateTime.now + 5.days,
+    bar_id: 1,
+    start_date: DateTime.now + 5.days + 2.hours,
+    end_date: DateTime.now + 5.days + 5.hours
+  },{
+    name: "Oktoberfest",
+    description: "Celebra con las mejores cervezas alemanas.",
+    date: DateTime.now + 6.days,
+    bar_id: 1,
+    start_date: DateTime.now + 6.days + 1.hour,
+    end_date: DateTime.now + 6.days + 4.hours
+  },{
+    name: "Feria de la Cerveza Artesanal",
+    description: "Encuentra y prueba las mejores cervezas artesanales.",
+    date: DateTime.now + 7.days,
+    bar_id: 1,
+    start_date: DateTime.now + 7.days + 1.hour,
+    end_date: DateTime.now + 7.days + 4.hours
+  },{
+    name: "Noche de Rock",
+    description: "Vive el rock en vivo acompañado de nuestras mejores cervezas.",
+    date: DateTime.now + 8.days,
+    bar_id: 1,
+    start_date: DateTime.now + 8.days + 3.hours,
+    end_date: DateTime.now + 8.days + 6.hours
+  },{
+    name: "Cerveza y Comida",
+    description: "Disfruta de una cata de cervezas con maridaje.",
+    date: DateTime.now + 9.days,
+    bar_id: 1,
+    start_date: DateTime.now + 9.days + 2.hours,
+    end_date: DateTime.now + 9.days + 4.hours
+  },{
+    name: "Festival de la IPA",
+    description: "Ven a disfrutar de las mejores IPAs de la región.",
+    date: DateTime.now + 10.days,
+    bar_id: 1,
+    start_date: DateTime.now + 10.days + 2.hours,
+    end_date: DateTime.now + 10.days + 5.hours
+  }
+]
+)
+Attendance.create([
+  {
+    user_id: 1,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 2,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 3,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 4,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 5,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 6,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 7,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 8,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 9,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  },
+  {
+    user_id: 10,
+    event_id: 1,
+    checked_in: true,
+    created_at: DateTime.now,
+    updated_at: DateTime.now
+  }
+])
 
 end
