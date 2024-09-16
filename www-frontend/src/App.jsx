@@ -115,7 +115,6 @@ function App() {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    
   };
 
   const filteredBeers = searchTerm.toLowerCase() === 'beers'
@@ -146,7 +145,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
   
   return (
     <Router >
-      <div style={{ paddingBottom: '80px' }}>
+      <div style={{ height: '100vh', backgroundSize: 'cover' }}>
         <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
           <Toolbar>
             <IconButton edge="start" color="inherit" aria-label="menu">
