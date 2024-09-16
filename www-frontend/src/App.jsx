@@ -75,7 +75,6 @@ function App() {
       });
   }, []);
 
-
   //Fetch de los datos de bares
   useEffect(() => {
     dispatch({ type: 'BARS_FETCH_INIT' });
@@ -116,6 +115,7 @@ function App() {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+    
   };
 
   const filteredBeers = searchTerm.toLowerCase() === 'beers'
