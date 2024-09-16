@@ -82,8 +82,7 @@ const EventShow = () => {
             const user = users[attendance.user_id];
             return (
               <li key={attendance.user_id}>
-                {user ? `${user.first_name} ${user.last_name}` : `Usuario ID: ${attendance.user_id}`} 
-                {attendance.checked_in ? " (Checked In)" : ""}
+                {user ? `@${user.handle}` : `Usuario ID: ${attendance.user_id}`} 
               </li>
             );
           })

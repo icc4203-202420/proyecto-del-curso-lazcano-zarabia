@@ -128,79 +128,84 @@ if Rails.env.development?
     start_date: DateTime.now + 10.days + 2.hours,
     end_date: DateTime.now + 10.days + 5.hours
   }
-]
-)
-Attendance.create([
-  {
-    user_id: 1,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 2,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 3,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 4,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 5,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 6,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 7,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 8,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 9,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  },
-  {
-    user_id: 10,
-    event_id: 1,
-    checked_in: true,
-    created_at: DateTime.now,
-    updated_at: DateTime.now
-  }
-])
+  ]
+  )
+  Attendance.create([
+    {
+      user_id: 1,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 2,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 3,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 4,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 5,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 6,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 7,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 8,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 9,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    },
+    {
+      user_id: 10,
+      event_id: 1,
+      checked_in: true,
+      created_at: DateTime.now,
+      updated_at: DateTime.now
+    }
+  ])
+
+  Country.create(id:34,name:"Chile")
+  Address.create(id:21,line1:"Av Vitacura 9257", city:"Santiago", country_id:34,user_id:1)
+  Bar.create(name:"Barba Azul", latitude: -33.3824107315216,longitude:-70.54742021868668, address_id:21)
+
 
 end
