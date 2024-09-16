@@ -113,7 +113,7 @@ const BeerReviewIndex = () => {
           >
             {users.map((user) => (
               <MenuItem key={user.id} value={user.id}>
-                {user.first_name} {user.last_name} ({user.handle})
+                {user.first_name} {user.last_name} (@{user.handle})
               </MenuItem>
             ))}
           </Select>

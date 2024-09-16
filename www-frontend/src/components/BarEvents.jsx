@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Typography, Container } from '@mui/material';
 
 function BarEvents() {
-  const { id } = useParams(); // Obtener el ID del bar desde la URL
+  const { id } = useParams(); 
 
   return (
     <Container style={{ marginTop: '20px' }}>

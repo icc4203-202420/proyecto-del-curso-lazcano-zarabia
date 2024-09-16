@@ -145,8 +145,8 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
 
   
   return (
-    <Router>
-      <div style={{ height: '100vh', backgroundSize: 'cover' }}>
+    <Router >
+      <div style={{ paddingBottom: '80px' }}>
         <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
           <Toolbar>
             <IconButton edge="start" color="inherit" aria-label="menu">
