@@ -2,12 +2,18 @@ import React, { useState, useReducer, useEffect, useRef } from 'react';
 import { AppBar, Toolbar, IconButton, InputBase, BottomNavigation, BottomNavigationAction, Paper, ListItemText, Drawer, ListItemIcon, ListItem } from '@mui/material';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIcon, FastfoodIcon } from './components/common/icons.js';
+
+
 import logo from './assets/Logo.png';
 import Home from './components/Home.jsx';
+import Profile from './components/profile/Profile.jsx';
+import SignUp from './components/profile/SignUp.jsx';
 import BeerShow from './components/BeerShow.jsx'
 import BarShow from './components/BarShow.jsx'
 import EventShow from './components/EventShow.jsx'
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
+
+
 //Las siguientes importanciones son para el mapa
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { useLoadGMapsLibraries } from './hooks/useLoadGMapsLibraries';
@@ -203,6 +209,8 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
             <Route path="/" element={<Home cities={cities} filteredCities={filteredCities}/>} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/SignUp" element={<SignUp />} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
