@@ -2,6 +2,7 @@ class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update]
 
+
   def index
     @users = User.includes(:reviews, :address).all
     render json: { users: @users }, status: :ok
@@ -45,5 +46,9 @@ class API::V1::UsersController < ApplicationController
               country_attributes: [:id, :name]],
               reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
             })
+  end
+
+  def verify_jwt_token
+    head :unauthorized unless current_user
   end
 end

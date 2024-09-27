@@ -1,12 +1,13 @@
 import React, { useState, useReducer, useEffect, useRef } from 'react';
 import { AppBar, Toolbar, IconButton, InputBase, BottomNavigation, BottomNavigationAction, Paper, ListItemText, Drawer, ListItemIcon, ListItem } from '@mui/material';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIcon, FastfoodIcon } from './components/common/icons.js';
-
+import { jwtDecode } from 'jwt-decode';
 
 import logo from './assets/Logo.png';
 import Home from './components/Home.jsx';
 import Profile from './components/profile/Profile.jsx';
+import Login from './components/profile/Login.jsx';
 import SignUp from './components/profile/SignUp.jsx';
 import BeerShow from './components/BeerShow.jsx'
 import BarShow from './components/BarShow.jsx'
@@ -65,6 +66,54 @@ function App() {
     isLoadingEvents: false,
     isError: false,
   });
+
+
+  //cosas de autenticación
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogin = (token) => {
+    localStorage.setItem('token', token);
+    setIsAuthenticated(true);
+    const decodedToken = jwtDecode(token);
+    localStorage.setItem('user_id', decodedToken.sub);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    setIsAuthenticated(false);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.exp * 1000 < Date.now()) {
+          handleLogout(); // Log out if token is expired
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        if (error instanceof DOMException) {
+          console.error('DOMException occurred while decoding the token:', error.message);
+        } else {
+          console.error('Invalid token:', error);
+        }
+        handleLogout(); // Log out if token is invalid
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!isAuthenticated && !['/login', '/signup'].includes(location.pathname) && !token) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
+
 
   const [cities, setCities] = useState([]);
   const [filteredCities, setFilteredCities] = useState([]);
@@ -150,7 +199,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
 
   
   return (
-    <Router >
+    < >
       <div style={{ height: '100vh', backgroundSize: 'cover' }}>
         <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
           <Toolbar>
@@ -209,8 +258,9 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
             <Route path="/" element={<Home cities={cities} filteredCities={filteredCities}/>} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile isAuthenticated={isAuthenticated} userId={localStorage.getItem('user_id')} />} />
             <Route path="/SignUp" element={<SignUp />} />
+            <Route path="/Login" element={<Login tokenHandler={handleLogin} />} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
@@ -222,12 +272,12 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
           <BottomNavigation showLabels>
             <BottomNavigationAction label="Favoritos" icon={<FavoriteIcon />} />
             <BottomNavigationAction component={Link} to="/" label="Inicio" icon={<HomeIcon />} />
-            <BottomNavigationAction label="Perfil" icon={<PersonIcon />} />
+            <BottomNavigationAction component={Link} to="/profile"label="Perfil" icon={<PersonIcon />} />
             <BottomNavigationAction label="Search" icon={<DehazeIcon />} />
           </BottomNavigation>
         </Paper>
       </div>
-    </Router>
+    </>
   );
 }
 

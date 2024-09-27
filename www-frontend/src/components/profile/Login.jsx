@@ -18,16 +18,16 @@ const initialValues = {
 };
 
 // Configuración de axios con axios-hooks
-axios.defaults.baseURL = 'http://127.0.0.1:3001/api/v1';
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
-const LoginForm = ({ tokenHandler }) => {
+const Login = ({ tokenHandler }) => {
   const [serverError, setServerError] = useState(''); // Estado para manejar el error del servidor
   const navigate = useNavigate(); // Hook para manejar la navegación
 
   // Definir el hook para la petición POST
   const [{ data, loading, error }, executePost] = useAxios(
     {
-      url: '/login',
+      url: 'http://localhost:3001/api/v1/login',
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     },
@@ -36,20 +36,25 @@ const LoginForm = ({ tokenHandler }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await executePost({ 
-        data: qs.stringify({user: values}) 
-      });
-      const receivedToken = response.data.token;
-      tokenHandler(receivedToken);
-      setServerError(''); // Limpia el mensaje de error si el login es exitoso
-      navigate('/'); // Redirige a la ruta raíz después de un login exitoso
+      const response = await executePost({ data: qs.stringify({ user: values }) });
+      console.log("Response: ", response);
+
+      const receivedToken = response.headers.authorization.split(' ')[1];
+
+      if (receivedToken) {
+        tokenHandler(receivedToken);
+        setServerError(''); // Clear the error message
+        navigate('/'); // Redirect after successful login
+      } else {
+        setServerError('No token received. Please try again.');
+      }
     } catch (err) {
+      console.error('Full error: ', err);
       if (err.response && err.response.status === 401) {
         setServerError('Correo electrónico o contraseña incorrectos.');
       } else {
         setServerError('Error en el servidor. Intenta nuevamente más tarde.');
       }
-      console.error('Error en el envío del formulario:', err);
     } finally {
       setSubmitting(false);
     }
@@ -126,4 +131,4 @@ const LoginForm = ({ tokenHandler }) => {
   );
 };
 
-export default LoginForm;
+export default Login;
