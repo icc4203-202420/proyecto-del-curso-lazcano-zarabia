@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const Profile = ({ isAuthenticated }) => {
+const Profile = ({ isAuthenticated, handleLogout }) => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Obtiene el token y user_id de localStorage
@@ -56,7 +59,17 @@ const Profile = ({ isAuthenticated }) => {
           <p>Name: {userDetails?.first_name} {userDetails?.last_name}</p>
           <p>@{userDetails?.handle}</p>
           <p>Email: {userDetails?.email}</p>
-          {/* Agrega otros detalles que quieras mostrar */}
+
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              handleLogout(); // Llama a la función handleLogout pasada como prop
+              navigate('/login'); // Redirige al usuario a la página de login
+            }}
+          >
+            Cerrar Sesión
+          </Button>
         </>
       ) : (
         <h1>No has iniciado sesión</h1>

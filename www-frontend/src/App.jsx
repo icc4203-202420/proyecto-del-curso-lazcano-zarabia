@@ -258,7 +258,12 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
         <div style={{ flex: 1, position: 'relative' }}>
           <Routes>
             <Route path="/" element={<Home cities={cities} filteredCities={filteredCities}/>} />
-            <Route path="/profile" element={<Profile isAuthenticated={isAuthenticated} userId={localStorage.getItem('user_id')} />} />
+            <Route path="/profile" 
+            element={<Profile 
+              isAuthenticated={isAuthenticated} 
+              userId={localStorage.getItem('user_id')} 
+              handleLogout={handleLogout}/>} 
+            />
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/Login" element={<Login tokenHandler={handleLogin} />} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
@@ -273,7 +278,6 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
             <BottomNavigationAction label="Favoritos" icon={<FavoriteIcon />} />
             <BottomNavigationAction component={Link} to="/" label="Inicio" icon={<HomeIcon />} />
             <BottomNavigationAction component={Link} to="/profile"label="Perfil" icon={<PersonIcon />} />
-            <BottomNavigationAction label="Search" icon={<DehazeIcon />} />
           </BottomNavigation>
         </Paper>
       </div>
