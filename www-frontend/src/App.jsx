@@ -79,11 +79,14 @@ function App() {
     isError: false,
   });
 
-
   //cosas de autenticación
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    setSearchTerm(''); 
+  }, [location.pathname]); 
 
   const handleLogin = (token) => {
     localStorage.setItem('token', token);
