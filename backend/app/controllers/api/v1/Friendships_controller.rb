@@ -10,6 +10,17 @@ class API::V1::FriendshipsController < ApplicationController
     end
   end
 
+  def check_friendship
+    user_id = params[:user_id]
+    friend_id = params[:friend_id]
+
+    # Verificar si existe una amistad en la base de datos
+    is_friend = Friendship.exists?(user_id: user_id, friend_id: friend_id) ||
+                Friendship.exists?(user_id: friend_id, friend_id: user_id)
+
+    render json: { is_friend: is_friend }
+  end
+
   private
 
   def friendship_params

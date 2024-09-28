@@ -21,7 +21,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :friendships, only: [:create]
+      resources :friendships, only: [:create] do
+        collection do
+          post :check_friendship
+        end
+      end
       resources :bars do
         resources :events, only: [:index, :show], controller: 'events', action: :index_by_bar
       end

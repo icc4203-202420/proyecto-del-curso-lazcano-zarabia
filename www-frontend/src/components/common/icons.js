@@ -8,3 +8,4 @@ export { default as DehazeIcon } from '@mui/icons-material/Dehaze';
 export { default as SportsBarIcon } from '@mui/icons-material/SportsBar';
 export { default as FastfoodIcon } from '@mui/icons-material/Fastfood';
 export { default as BookmarkIcon } from '@mui/icons-material/Bookmark';
+export { default as PersonAddIcon } from '@mui/icons-material/PersonAdd';
