@@ -4,14 +4,16 @@ import { BrowserRouter as Router, Route, Routes, Link, useNavigate, useLocation 
 import { SearchIcon, FavoriteIcon, HomeIcon, PersonIcon, DehazeIcon, SportsBarIcon, FastfoodIcon } from './components/common/icons.js';
 import { jwtDecode } from 'jwt-decode';
 
+//importaciones de componentes
 import logo from './assets/Logo.png';
 import Home from './components/Home.jsx';
 import Profile from './components/profile/Profile.jsx';
 import Login from './components/profile/Login.jsx';
 import SignUp from './components/profile/SignUp.jsx';
-import BeerShow from './components/BeerShow.jsx'
-import BarShow from './components/BarShow.jsx'
-import EventShow from './components/EventShow.jsx'
+import UserShow from './components/Show/UserShow.jsx';
+import BeerShow from './components/Show/BeerShow.jsx'
+import BarShow from './components/Show/BarShow.jsx'
+import EventShow from './components/Show/EventShow.jsx'
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
 
 
@@ -22,6 +24,7 @@ import { MAPS_LIBRARY, MARKER_LIBRARY, ControlPosition } from './constants';
 
 const API_BEERS = 'http://127.0.0.1:3001/api/v1/beers';
 const API_BARS = 'http://127.0.0.1:3001/api/v1/bars';
+const API_USERS = 'http://127.0.0.1:3001/api/v1/users';
 
 const dataReducer = (state, action) => {
   switch (action.type) {
@@ -50,6 +53,13 @@ const dataReducer = (state, action) => {
     case 'EVENTS_FETCH_FAILURE':
       return { ...state, isLoadingEvents: false, isError: true };
 
+    case 'USERS_FETCH_INIT':  
+      return { ...state, isLoadingUsers: true, isError: false };
+    case 'USERS_FETCH_SUCCESS': 
+      return { ...state, isLoadingUsers: false, users: action.payload };
+    case 'USERS_FETCH_FAILURE': 
+      return { ...state, isLoadingUsers: false, isError: true };
+
     default:
       throw new Error();
   }
@@ -61,9 +71,11 @@ function App() {
     beers: [],
     bars: [],
     events: {},
+    users: [],
     isLoadingBeers: false,
     isLoadingBars: false,
     isLoadingEvents: false,
+    isLoadingUsers: false,
     isError: false,
   });
 
@@ -130,6 +142,20 @@ function App() {
       });
   }, []);
 
+  //Fetch de los datos de usuarios
+
+  useEffect(() => {
+    dispatch({ type: 'USERS_FETCH_INIT' });
+    fetch(API_USERS)
+      .then((response) => response.json())
+      .then((result) => {
+        dispatch({ type: 'USERS_FETCH_SUCCESS', payload: result.users }); // Asumiendo que la respuesta contiene un array `users`
+      })
+      .catch(() => {
+        dispatch({ type: 'USERS_FETCH_FAILURE' });
+      });
+  }, []);
+
   //Fetch de los datos de bares
   useEffect(() => {
     dispatch({ type: 'BARS_FETCH_INIT' });
@@ -178,23 +204,31 @@ function App() {
       beer.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-const filteredBars = searchTerm.toLowerCase() === 'bars'
-  ? state.bars
-  : state.bars.filter((bar) =>
-      bar.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBars = searchTerm.toLowerCase() === 'bars'
+    ? state.bars
+    : state.bars.filter((bar) =>
+        bar.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+  const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
+    ? state.events
+    : Object.keys(state.events).reduce((filtered, barId) => {
+        const filteredEvents = state.events[barId].filter((event) =>
+          event.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (filteredEvents.length > 0) {
+          filtered[barId] = filteredEvents;
+        }
+        return filtered;
+      }, {});
+
+  const filteredUsers = searchTerm.toLowerCase() === 'users'
+  ? state.users
+  : state.users.filter((user) =>
+      user.handle.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
-  ? state.events
-  : Object.keys(state.events).reduce((filtered, barId) => {
-      const filteredEvents = state.events[barId].filter((event) =>
-        event.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      if (filteredEvents.length > 0) {
-        filtered[barId] = filteredEvents;
-      }
-      return filtered;
-    }, {});
+
 
 
   
@@ -223,6 +257,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
 
         {searchTerm ? (
           <>
+            {/* Sección de cervezas */}
             <h2>Beers</h2>
             {state.isLoadingBeers ? (
               <p>Loading beers...</p>
@@ -230,6 +265,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
               <List list={filteredBeers} type="beer" />
             )}
 
+            {/* Sección de bares */}
             <h2>Bars</h2>
             {state.isLoadingBars ? (
               <p>Loading bars...</p>
@@ -237,6 +273,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
               <List list={filteredBars} type="bar" />
             )}
 
+            {/* Sección de eventos */}
             <h2>Events</h2>
             {state.isLoadingEvents ? (
               <p>Loading events...</p>
@@ -248,10 +285,19 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
                 </div>
               ))
             )}
+
+            {/* Sección de usuarios */}
+            <h2>Users</h2>
+            {state.isLoadingUsers ? (
+              <p>Loading users...</p>
+            ) : (
+              <List list={filteredUsers} type="user" />
+            )}
           </>
         ) : (
           <p></p>
         )}
+
 
       
 
@@ -266,6 +312,7 @@ const filteredEventsByBar = searchTerm.toLowerCase() === 'events'
             />
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/Login" element={<Login tokenHandler={handleLogin} />} />
+            <Route path="/users/:id" element={<UserShow />} /> 
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
@@ -303,11 +350,16 @@ const Item = ({ item, type }) => (
       <span>
         <Link to={`/bars/${item.id}`}> {item.name} </Link> {item.style}
       </span>
+    ) : type === 'user' ? (
+      <span>
+        <Link to={`/users/${item.id}`}>{item.handle}</Link>
+      </span>
     ) : (
-      <span>{item.name}</span> 
+      <span>{item.name}</span>
     )}
   </li>
 );
+
 
 
 export default App;
