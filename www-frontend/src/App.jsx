@@ -315,7 +315,7 @@ function App() {
             />
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/Login" element={<Login tokenHandler={handleLogin} />} />
-            <Route path="/users/:id" element={<UserShow />} /> 
+            <Route path="/users/:id" element={<UserShow userId={localStorage.getItem('user_id')} />} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
