@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Typography, Autocomplete, TextField, Box } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { EditIcon } from '../common/icons'; // Importar el EditIcon desde el archivo correspondiente
 
 const UserShow = ({ userId, events, bars }) => {
   const { id: friendId } = useParams();
@@ -9,7 +10,7 @@ const UserShow = ({ userId, events, bars }) => {
   const [isFriend, setIsFriend] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [friendship, setFriendship] = useState(null);
-  const [isEditingEvent, setIsEditingEvent] = useState(false); // Nuevo estado para controlar la edición
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -25,8 +26,8 @@ const UserShow = ({ userId, events, bars }) => {
           throw new Error('Error al obtener los detalles de la amistad');
         }
         const data = await response.json();
-        setFriendship(data); // Almacena los detalles de la amistad
-        setSelectedEvent(data.event_id ? events.find(event => event.id === data.event_id) : null); // Si tiene event_id, selecciona el evento correspondiente
+        setFriendship(data);
+        setSelectedEvent(data.event_id ? events.find(event => event.id === data.event_id) : null);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -130,7 +131,7 @@ const UserShow = ({ userId, events, bars }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          },
+        },
         body: JSON.stringify({
           user_id: userId,
           friend_id: friendId,
@@ -140,7 +141,7 @@ const UserShow = ({ userId, events, bars }) => {
 
       if (response.ok) {
         console.log('Event added to friendship successfully.');
-        setIsEditingEvent(false); // Salir del modo de edición
+        setIsEditingEvent(false);
       } else {
         const errorData = await response.json();
         console.error('Error al agregar el evento a la amistad:', errorData);
@@ -186,8 +187,16 @@ const UserShow = ({ userId, events, bars }) => {
           <Typography variant="h6" gutterBottom style={{ marginRight: 16 }}>
             Se conocieron en el evento: {selectedEvent ? selectedEvent.name : 'Desconocido'} en el bar {getBarName(selectedEvent ? selectedEvent.bar_id : null)}
           </Typography>
-          <Button variant="outlined" color="primary" onClick={() => setIsEditingEvent(true)}>
-            Editar
+          <Button
+            variant="contained"
+            onClick={() => setIsEditingEvent(true)}
+            sx={{
+              bgcolor: '#FFD700', 
+              color: 'black',
+              '&:hover': { bgcolor: '#FFC107' }, 
+            }}
+          >
+            {<EditIcon/>}
           </Button>
         </Box>
       )}

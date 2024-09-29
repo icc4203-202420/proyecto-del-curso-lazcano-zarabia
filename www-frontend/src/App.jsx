@@ -16,7 +16,7 @@ import BarShow from './components/Show/BarShow.jsx'
 import EventShow from './components/Show/EventShow.jsx'
 import EventPictures from './components/Show/EventPictures';
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
-import EventPictureShow from './components/Show/EventPictureShow';  // Importar el nuevo componente
+import EventPictureShow from './components/Show/EventPictureShow';  
 
 
 
@@ -179,7 +179,7 @@ function App() {
           },
         }));
   
-        setCities(barLocations); // Guarda las ubicaciones en el estado cities
+        setCities(barLocations); 
         setFilteredCities(barLocations);
 
         // Continuar obteniendo los eventos para cada bar
