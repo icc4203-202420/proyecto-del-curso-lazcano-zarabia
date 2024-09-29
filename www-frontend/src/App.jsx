@@ -319,7 +319,7 @@ function App() {
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
-            <Route path="/bars/:id_bar/events/:id_event" element={<EventShow />} />
+            <Route path="/bars/:id_bar/events/:id_event" element={<EventShow userId={localStorage.getItem('user_id')}/>} />
           </Routes>
         </div>
 

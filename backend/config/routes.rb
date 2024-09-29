@@ -36,9 +36,13 @@ Rails.application.routes.draw do
       resources :users do
         resources :reviews, only: [:index,:show, :create]
       end
-      resources :events, only: [:show, :create, :update, :destroy] do
+      resources :events do
         resources :attendances, only: [:create]
-        get 'attendances', to: 'attendances#index_by_event'  # Añadir :create para soportar la creación
+        get 'attendances', to: 'attendances#index_by_event'
+        get :event_pictures
+        member do
+          post :add_images
+        end
       end
 
       resources :addresses

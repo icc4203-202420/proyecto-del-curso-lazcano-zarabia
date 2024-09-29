@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material'; 
+import { FormControl, InputLabel, Select, MenuItem, Button, TextField } from '@mui/material';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup'; // Importar Yup para la validación
 
-const EventShow = () => {
+const EventShow = ({userId}) => {
   const { id_bar, id_event } = useParams();
   const [event, setEvent] = useState(null);
   const [bar, setBar] = useState(null);
@@ -47,6 +49,7 @@ const EventShow = () => {
     fetchEventBarAndAddress();
   }, [id_bar, id_event]);
 
+  // Manejo del formulario de asistencia
   const handleAddAttendance = async (e) => {
     e.preventDefault();
     try {
@@ -71,6 +74,35 @@ const EventShow = () => {
     }
   };
 
+  const handleImageUpload = async (values, { setSubmitting }) => {
+    const formData = new FormData();
+    Array.from(values.flyers).forEach((file) => {
+      formData.append('flyers[]', file);
+    });
+    
+    // Incluir el `user_id` en el FormData
+    formData.append('user_id', userId);
+  
+    try {
+      const response = await fetch(`http://127.0.0.1:3001/api/v1/events/${id_event}/add_images`, {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (response.ok) {
+        alert('Imágenes subidas correctamente');
+      } else {
+        console.error('Error al subir las imágenes');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  
+  
+
   const availableUsers = allUsers.filter(
     (user) => !attendances.some((attendance) => attendance.user_id === user.id)
   );
@@ -85,12 +117,37 @@ const EventShow = () => {
 
   return (
     <div>
-      <h1>Evento: {event.name}</h1>
+      <h1>Evento: {event.name} {event.id}</h1>
       <p>{event.description}</p>
       <p>Fecha: {event.date}</p>
       <h2>Bar: {bar.name}</h2>
       <p>Dirección: {address.line1}, {address.line2 ? address.line2 + ',' : ''} {address.city}</p>
       
+      {/* Formulario para subir imágenes sin validación */}
+      <Formik
+        initialValues={{ flyers: [] }}
+        onSubmit={handleImageUpload}
+      >
+        {({ setFieldValue, isSubmitting }) => (
+          <Form>
+            <FormControl fullWidth style={{ marginBottom: '20px' }}>
+              <input
+                id="flyers"
+                name="flyers"
+                type="file"
+                multiple
+                onChange={(event) => setFieldValue("flyers", event.currentTarget.files)}
+                style={{ marginBottom: '20px' }}
+              />
+            </FormControl>
+            <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Subiendo...' : 'Subir Imágenes'}
+            </Button>
+          </Form>
+        )}
+      </Formik>
+
+
       <h3>Asistentes:</h3>
       <ul>
         {attendances.length > 0 ? (
