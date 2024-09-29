@@ -35,6 +35,7 @@ Rails.application.routes.draw do
       end
       resources :users do
         resources :reviews, only: [:index,:show, :create]
+        resources :friendships, only: [:index, :show]
       end
       resources :events do
         resources :attendances, only: [:create]
