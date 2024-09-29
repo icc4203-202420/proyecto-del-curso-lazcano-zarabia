@@ -4,14 +4,41 @@ import { Button, Typography, Autocomplete, TextField, Box } from '@mui/material'
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const UserShow = ({ userId, events, bars }) => {
-  const { id: friendId } = useParams(); 
+  const { id: friendId } = useParams();
   const [user, setUser] = useState(null);
-  const [isFriend, setIsFriend] = useState(false); 
-  const [selectedEvent, setSelectedEvent] = useState(null); 
+  const [isFriend, setIsFriend] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [friendship, setFriendship] = useState(null);
+  const [isEditingEvent, setIsEditingEvent] = useState(false); // Nuevo estado para controlar la edición
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  //Fetch data friend
+  // Fetch para obtener la amistad específica entre userId y friendId
+  useEffect(() => {
+    const fetchFriendshipDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://127.0.0.1:3001/api/v1/users/${userId}/friendships/${friendId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error('Error al obtener los detalles de la amistad');
+        }
+        const data = await response.json();
+        setFriendship(data); // Almacena los detalles de la amistad
+        setSelectedEvent(data.event_id ? events.find(event => event.id === data.event_id) : null); // Si tiene event_id, selecciona el evento correspondiente
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError('No se pudieron obtener los detalles de la amistad');
+        setLoading(false);
+      }
+    };
+
+    fetchFriendshipDetails();
+  }, [userId, friendId, events]);
+
+  // Fetch data del amigo (user)
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -47,8 +74,8 @@ const UserShow = ({ userId, events, bars }) => {
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            user_id: userId, 
-            friend_id: friendId, 
+            user_id: userId,
+            friend_id: friendId,
           }),
         });
 
@@ -64,13 +91,13 @@ const UserShow = ({ userId, events, bars }) => {
       }
     };
 
-    checkFriendshipStatus(); 
+    checkFriendshipStatus();
   }, [userId, friendId]);
 
   // Función para enviar la solicitud de amistad
   const handleAddFriend = async () => {
     try {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://127.0.0.1:3001/api/v1/friendships`, {
         method: 'POST',
         headers: {
@@ -78,13 +105,13 @@ const UserShow = ({ userId, events, bars }) => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          user_id: userId, 
-          friend_id: friendId, 
+          user_id: userId,
+          friend_id: friendId,
         }),
       });
 
       if (response.ok) {
-        setIsFriend(true); 
+        setIsFriend(true);
       } else {
         const errorData = await response.json();
         console.error('Error al agregar como amigo:', errorData);
@@ -103,16 +130,17 @@ const UserShow = ({ userId, events, bars }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
+          },
         body: JSON.stringify({
-          user_id: userId, 
-          friend_id: friendId, 
-          event_id: selectedEvent ? selectedEvent.id : null, 
+          user_id: userId,
+          friend_id: friendId,
+          event_id: selectedEvent ? selectedEvent.id : null,
         }),
       });
 
       if (response.ok) {
         console.log('Event added to friendship successfully.');
+        setIsEditingEvent(false); // Salir del modo de edición
       } else {
         const errorData = await response.json();
         console.error('Error al agregar el evento a la amistad:', errorData);
@@ -126,7 +154,6 @@ const UserShow = ({ userId, events, bars }) => {
     const bar = bars.find(bar => bar.id === barId);
     return bar ? bar.name : 'Unknown Bar';
   };
-  
 
   if (loading) return <Typography variant="h6">Cargando detalles del usuario...</Typography>;
 
@@ -148,24 +175,35 @@ const UserShow = ({ userId, events, bars }) => {
           color={isFriend ? 'default' : 'primary'}
           onClick={handleAddFriend}
           startIcon={<PersonAddIcon />}
-          disabled={isFriend} 
+          disabled={isFriend}
         >
           {isFriend ? 'Friends' : 'Add Friend'}
         </Button>
       </Box>
 
-      {isFriend && (
+      {isFriend && friendship && friendship.event_id && !isEditingEvent && (
+        <Box display="flex" alignItems="center" marginBottom={2}>
+          <Typography variant="h6" gutterBottom style={{ marginRight: 16 }}>
+            Se conocieron en el evento: {selectedEvent ? selectedEvent.name : 'Desconocido'} en el bar {getBarName(selectedEvent ? selectedEvent.bar_id : null)}
+          </Typography>
+          <Button variant="outlined" color="primary" onClick={() => setIsEditingEvent(true)}>
+            Editar
+          </Button>
+        </Box>
+      )}
+
+      {isFriend && isEditingEvent && (
         <div>
           <Typography variant="h6" gutterBottom>
             {selectedEvent ? 'Cambiar el evento donde se conocieron:' : 'Seleccionar el evento donde se conocieron:'}
           </Typography>
           <Autocomplete
             disablePortal
-            options={events} 
+            options={events}
             getOptionLabel={(option) => `${option.name} - ${getBarName(option.bar_id)}`}
             sx={{ width: 300, marginBottom: 2 }}
-            value={selectedEvent} 
-            onChange={(event, newValue) => setSelectedEvent(newValue)} 
+            value={selectedEvent}
+            onChange={(event, newValue) => setSelectedEvent(newValue)}
             renderInput={(params) => <TextField {...params} label="Evento donde se conocieron" />}
           />
           <Button
@@ -175,6 +213,9 @@ const UserShow = ({ userId, events, bars }) => {
             disabled={!selectedEvent}
           >
             {selectedEvent ? 'Cambiar Evento' : 'Agregar Evento'}
+          </Button>
+          <Button variant="outlined" color="default" onClick={() => setIsEditingEvent(false)} style={{ marginLeft: 8 }}>
+            Cancelar
           </Button>
         </div>
       )}
