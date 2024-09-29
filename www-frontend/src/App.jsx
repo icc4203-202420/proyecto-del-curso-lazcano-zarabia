@@ -14,6 +14,7 @@ import UserShow from './components/Show/UserShow.jsx';
 import BeerShow from './components/Show/BeerShow.jsx'
 import BarShow from './components/Show/BarShow.jsx'
 import EventShow from './components/Show/EventShow.jsx'
+import EventPictures from './components/Show/EventPictures';
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
 
 
@@ -320,6 +321,7 @@ function App() {
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
             <Route path="/bars/:id_bar/events/:id_event" element={<EventShow userId={localStorage.getItem('user_id')}/>} />
+            <Route path="/events/:id_event/pictures" element={<EventPictures />} />
           </Routes>
         </div>
 

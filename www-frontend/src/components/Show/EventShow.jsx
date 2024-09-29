@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { FormControl, InputLabel, Select, MenuItem, Button, TextField } from '@mui/material';
+import { useParams, Link } from 'react-router-dom';
+import { FormControl, InputLabel, Select, MenuItem, Button, Typography, Box } from '@mui/material';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup'; // Importar Yup para la validación
 
@@ -117,7 +117,24 @@ const EventShow = ({userId}) => {
 
   return (
     <div>
-      <h1>Evento: {event.name} {event.id}</h1>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+        {/* Título del evento */}
+        <Typography variant="h4" component="h1">
+          Evento: {event.name}
+        </Typography>
+        
+        {/* Botón para ver la galería */}
+        <Button
+          component={Link}
+          to={`/events/${id_event}/pictures`}
+          variant="contained"
+          color="secondary"
+          style={{ marginLeft: '20px' }}  // Espacio entre el título y el botón
+        >
+          Ver Galería de Imágenes
+        </Button>
+      </Box>
+      
       <p>{event.description}</p>
       <p>Fecha: {event.date}</p>
       <h2>Bar: {bar.name}</h2>
