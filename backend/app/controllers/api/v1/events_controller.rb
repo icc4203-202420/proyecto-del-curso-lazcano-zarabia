@@ -24,6 +24,18 @@ class API::V1::EventsController < ApplicationController
     render json: { event_id: @event.id, pictures: pictures }, status: :ok
   end
 
+  def display_picture
+
+    @event = Event.find(params[:event_id])
+    picture = @event.event_pictures.find_by(id: params[:picture_id])
+
+    if picture&.image&.attached?
+      render json: { id: picture.id, image_url: url_for(picture.image) }, status: :ok
+    else
+      render json: { error: 'Imagen no encontrada o no adjunta.' }, status: :not_found
+    end
+  end
+
 
   def create
     @event = Event.new(event_params)

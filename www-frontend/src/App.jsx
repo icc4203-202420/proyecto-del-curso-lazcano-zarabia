@@ -16,6 +16,8 @@ import BarShow from './components/Show/BarShow.jsx'
 import EventShow from './components/Show/EventShow.jsx'
 import EventPictures from './components/Show/EventPictures';
 import BeerReviewIndex from './components/BeerReviewIndex.jsx';
+import EventPictureShow from './components/Show/EventPictureShow';  // Importar el nuevo componente
+
 
 
 //Las siguientes importanciones son para el mapa
@@ -322,6 +324,7 @@ function App() {
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />
             <Route path="/bars/:id_bar/events/:id_event" element={<EventShow userId={localStorage.getItem('user_id')}/>} />
             <Route path="/events/:id_event/pictures" element={<EventPictures />} />
+            <Route path="/events/:id_event/pictures/:id_picture" element={<EventPictureShow />} />
           </Routes>
         </div>
 

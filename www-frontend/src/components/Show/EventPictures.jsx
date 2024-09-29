@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Grid, Card, CardMedia, Typography, Button } from '@mui/material';
 
 const EventPictures = () => {
-  const { id_event } = useParams();  // Obtener el `id_event` desde los parámetros de la URL
+  const { id_event } = useParams();
   const [pictures, setPictures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +13,7 @@ const EventPictures = () => {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/v1/events/${id_event}/event_pictures`);
         const data = await response.json();
-        setPictures(data.pictures || []);  // Asignar las imágenes a `pictures`
+        setPictures(data.pictures || []);
       } catch (err) {
         console.error('Error al cargar las imágenes del evento:', err);
         setError('No se pudieron cargar las imágenes.');
@@ -35,18 +35,21 @@ const EventPictures = () => {
       </Typography>
       <Grid container spacing={3}>
         {pictures.length > 0 ? (
-          // Filtrar y mapear solo las imágenes con `image_url` válido
           pictures
             .filter((picture) => picture.image_url !== null && picture.image_url.trim() !== "")
             .map((picture) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={picture.id}>
                 <Card>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={picture.image_url}
-                    alt={`Imagen del evento ${id_event}`}
-                  />
+                  {/* Link para navegar a la página de la imagen individual */}
+                  <Link to={`/events/${id_event}/pictures/${picture.id}`}>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={picture.image_url}
+                      alt={`Imagen del evento ${id_event}`}
+                      style={{ cursor: 'pointer' }}  // Cambiar cursor para indicar que es clicable
+                    />
+                  </Link>
                 </Card>
               </Grid>
             ))

@@ -43,6 +43,7 @@ Rails.application.routes.draw do
         member do
           post :add_images
         end
+        get 'event_pictures/:picture_id', to: 'events#display_picture', as: 'display_picture'
       end
 
       resources :addresses
