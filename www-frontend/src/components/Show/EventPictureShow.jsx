@@ -43,16 +43,18 @@ const EventPictureShow = ({ users }) => {
   // Manejar el evento de agregar una etiqueta a la imagen
   const handleAddTag = async () => {
     if (!selectedUser) return;
-
+  
     try {
       const response = await fetch(`http://127.0.0.1:3001/api/v1/events/${id_event}/event_pictures/${id_picture}/tags`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: selectedUser.id }),
       });
-
+  
       if (response.ok) {
-        const newTag = await response.json();
+        // Crear una nueva etiqueta utilizando la información del `selectedUser`
+        const newTag = { user_id: selectedUser.id, handle: selectedUser.handle };
+        
         setTags([...tags, newTag]);  // Actualizar la lista de etiquetas con la nueva etiqueta
         setSelectedUser(null);  // Limpiar la selección de usuario después de agregar la etiqueta
       } else {
@@ -62,6 +64,7 @@ const EventPictureShow = ({ users }) => {
       console.error('Error al agregar la etiqueta:', err);
     }
   };
+  
 
   // Manejar el evento de eliminar una etiqueta de la imagen
   const handleRemoveTag = async (userId) => {
@@ -110,7 +113,7 @@ const EventPictureShow = ({ users }) => {
       <Autocomplete
         disablePortal
         options={availableUsers}  // Usar la lista de usuarios disponibles
-        getOptionLabel={(user) => `${user.first_name} ${user.last_name} (@${user.handle})`}
+        getOptionLabel={(user) => `@${user.handle}`}
         sx={{ width: 300, marginBottom: '20px' }}
         onChange={(event, newValue) => setSelectedUser(newValue)}  // Establecer el usuario seleccionado
         renderInput={(params) => <TextField {...params} label="Etiquetar a un usuario" />}
@@ -125,16 +128,20 @@ const EventPictureShow = ({ users }) => {
         Usuarios etiquetados:
       </Typography>
       <List>
-        {tags.map(tag => (
-          <ListItem key={tag.user_id} secondaryAction={
-            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveTag(tag.user_id)}>
-              <DeleteIcon />
-            </IconButton>
-          }>
-            <ListItemText primary={`@${tag.handle}`} />
+        {tags.map((tag, index) => (
+          <ListItem 
+            key={tag.user_id || index} // Asegúrate de usar `user_id` o `index` como respaldo si `user_id` es undefined
+            secondaryAction={
+              <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveTag(tag.user_id)}>
+                <DeleteIcon />
+              </IconButton>
+            }
+          >
+            <ListItemText primary={`@${tag.handle || 'undefined'}`} /> {/* Mostrar `undefined` temporalmente si `tag.handle` es undefined */}
           </ListItem>
         ))}
       </List>
+
 
       {/* Link para regresar a la galería de imágenes */}
       <Button
