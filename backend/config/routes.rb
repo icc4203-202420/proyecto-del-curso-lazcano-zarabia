@@ -44,6 +44,11 @@ Rails.application.routes.draw do
           post :add_images
         end
         get 'event_pictures/:picture_id', to: 'events#display_picture', as: 'display_picture'
+
+        get 'event_pictures/:picture_id/tags', to: 'events#tags', as: 'get_picture_tags'
+        post 'event_pictures/:picture_id/tags', to: 'events#add_picture_tag', as: 'add_picture_tag'
+        delete 'event_pictures/:picture_id/tags/:user_id', to: 'events#remove_picture_tag', as: 'remove_picture_tag'
+
       end
 
       resources :addresses

@@ -36,6 +36,40 @@ class API::V1::EventsController < ApplicationController
     end
   end
 
+  def tags
+    @event = Event.find(params[:event_id])
+    picture = @event.event_pictures.find(params[:picture_id])
+
+    tags = picture.picture_tags.map do |tag|
+      user = tag.user
+      { user_id: user.id, handle: user.handle, first_name: user.first_name, last_name: user.last_name }
+    end
+
+    render json: { tags: tags }, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Imagen o etiquetas no encontradas.' }, status: :not_found
+  end
+
+  def add_picture_tag
+    @event = Event.find(params[:event_id])
+    @event_picture = @event.event_pictures.find(params[:picture_id])
+    user = User.find(params[:user_id])
+    if @event_picture.picture_tags.create(user: user)
+      render json: { success: 'Usuario etiquetado correctamente en la imagen' }, status: :ok
+    else
+      render json: { error: 'No se pudo etiquetar al usuario' }, status: :unprocessable_entity
+    end
+  end
+
+  def remove_picture_tag
+    tag = @event_picture.picture_tags.find_by(user_id: params[:user_id])
+    if tag&.destroy
+      render json: { success: 'Usuario des-etiquetado de la imagen' }, status: :ok
+    else
+      render json: { error: 'No se pudo des-etiquetar al usuario' }, status: :unprocessable_entity
+    end
+  end
+
 
   def create
     @event = Event.new(event_params)
