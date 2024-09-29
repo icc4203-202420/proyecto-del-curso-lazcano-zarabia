@@ -62,6 +62,8 @@ class API::V1::EventsController < ApplicationController
   end
 
   def remove_picture_tag
+    @event = Event.find(params[:event_id])
+    @event_picture = @event.event_pictures.find(params[:picture_id])
     tag = @event_picture.picture_tags.find_by(user_id: params[:user_id])
     if tag&.destroy
       render json: { success: 'Usuario des-etiquetado de la imagen' }, status: :ok
