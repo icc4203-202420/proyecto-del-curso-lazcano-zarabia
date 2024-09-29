@@ -155,7 +155,7 @@ function App() {
     fetch(API_USERS)
       .then((response) => response.json())
       .then((result) => {
-        dispatch({ type: 'USERS_FETCH_SUCCESS', payload: result.users }); // Asumiendo que la respuesta contiene un array `users`
+        dispatch({ type: 'USERS_FETCH_SUCCESS', payload: result.users }); 
       })
       .catch(() => {
         dispatch({ type: 'USERS_FETCH_FAILURE' });
@@ -171,11 +171,10 @@ function App() {
       .then((result) => {
         dispatch({ type: 'BARS_FETCH_SUCCESS', payload: result.bars });
   
-        // Extrae las ubicaciones de los bares y guárdalas en cities
         const barLocations = result.bars.map((bar) => ({
           name: bar.name,
           position: {
-            lat: bar.latitude, // Asegúrate de que estos campos existan en los datos de bar
+            lat: bar.latitude, 
             lng: bar.longitude,
           },
         }));
@@ -318,7 +317,7 @@ function App() {
             />
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/Login" element={<Login tokenHandler={handleLogin} />} />
-            <Route path="/users/:id" element={<UserShow userId={localStorage.getItem('user_id')} bars={state.bars} />} />
+            <Route path="/users/:id" element={<UserShow userId={localStorage.getItem('user_id')} events={Object.values(state.events).flat()} bars={state.bars} />} />
             <Route path="/beers/:id" element={<BeerShow beers={state.beers} />} />
             <Route path="/beers/:id/reviews" element={<BeerReviewIndex />} />
             <Route path="/bars/:id" element={<BarShow bars={state.bars} />} />

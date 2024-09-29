@@ -24,7 +24,7 @@ Rails.application.routes.draw do
       resources :friendships, only: [:create] do
         collection do
           post :check_friendship
-          post :add_bar
+          post :add_event
         end
       end
       resources :bars do

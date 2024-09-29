@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import { Button, Typography, Autocomplete, TextField, Box } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
-const UserShow = ({ userId, bars }) => {
+const UserShow = ({ userId, events, bars }) => {
   const { id: friendId } = useParams(); 
   const [user, setUser] = useState(null);
   const [isFriend, setIsFriend] = useState(false); 
-  const [selectedBar, setSelectedBar] = useState(null); 
+  const [selectedEvent, setSelectedEvent] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -94,11 +94,11 @@ const UserShow = ({ userId, bars }) => {
     }
   };
 
-  // Función para agregar el bar donde se conocieron después de hacerse amigos
-  const handleAddBarToFriendship = async () => {
+  // Función para agregar el evento donde se conocieron después de hacerse amigos
+  const handleAddEventToFriendship = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://127.0.0.1:3001/api/v1/friendships/add_bar`, {
+      const response = await fetch(`http://127.0.0.1:3001/api/v1/friendships/add_event`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,20 +107,26 @@ const UserShow = ({ userId, bars }) => {
         body: JSON.stringify({
           user_id: userId, 
           friend_id: friendId, 
-          bar_id: selectedBar ? selectedBar.id : null, 
+          event_id: selectedEvent ? selectedEvent.id : null, 
         }),
       });
 
       if (response.ok) {
-        console.log('Bar added to friendship successfully.');
+        console.log('Event added to friendship successfully.');
       } else {
         const errorData = await response.json();
-        console.error('Error al agregar el bar a la amistad:', errorData);
+        console.error('Error al agregar el evento a la amistad:', errorData);
       }
     } catch (error) {
       console.error('Error de red:', error);
     }
   };
+
+  const getBarName = (barId) => {
+    const bar = bars.find(bar => bar.id === barId);
+    return bar ? bar.name : 'Unknown Bar';
+  };
+  
 
   if (loading) return <Typography variant="h6">Cargando detalles del usuario...</Typography>;
 
@@ -151,24 +157,24 @@ const UserShow = ({ userId, bars }) => {
       {isFriend && (
         <div>
           <Typography variant="h6" gutterBottom>
-            {selectedBar ? 'Cambiar el bar donde se conocieron:' : 'Seleccionar el bar donde se conocieron:'}
+            {selectedEvent ? 'Cambiar el evento donde se conocieron:' : 'Seleccionar el evento donde se conocieron:'}
           </Typography>
           <Autocomplete
             disablePortal
-            options={bars} 
-            getOptionLabel={(option) => option.name} 
+            options={events} 
+            getOptionLabel={(option) => `${option.name} - ${getBarName(option.bar_id)}`}
             sx={{ width: 300, marginBottom: 2 }}
-            value={selectedBar} 
-            onChange={(event, newValue) => setSelectedBar(newValue)} 
-            renderInput={(params) => <TextField {...params} label="Bar donde se conocieron" />}
+            value={selectedEvent} 
+            onChange={(event, newValue) => setSelectedEvent(newValue)} 
+            renderInput={(params) => <TextField {...params} label="Evento donde se conocieron" />}
           />
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleAddBarToFriendship}
-            disabled={!selectedBar}
+            onClick={handleAddEventToFriendship}
+            disabled={!selectedEvent}
           >
-            {selectedBar ? 'Cambiar Bar' : 'Agregar Bar'}
+            {selectedEvent ? 'Cambiar Evento' : 'Agregar Evento'}
           </Button>
         </div>
       )}
