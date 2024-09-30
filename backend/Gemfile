@@ -34,12 +34,16 @@ gem 'active_storage_validations'
 gem "image_processing", "~> 1.2"
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
+#Esta gema es para la coneccion del front y back end, por tener puertos separados
 gem "rack-cors"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  gem 'rails-erd'
   gem 'rspec-rails'
+  gem 'pry-rails'
+  gem 'pry-byebug'
   gem 'factory_bot_rails', '~> 6.4'
   gem 'faker', '~> 3.4'
 end

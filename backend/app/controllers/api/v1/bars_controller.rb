@@ -13,8 +13,8 @@ class API::V1::BarsController < ApplicationController
 
   def show
     if @bar.image.attached?
-      render json: @bar.as_json.merge({ 
-        image_url: url_for(@bar.image), 
+      render json: @bar.as_json.merge({
+        image_url: url_for(@bar.image),
         thumbnail_url: url_for(@bar.thumbnail) }),
         status: :ok
     else
@@ -32,7 +32,7 @@ class API::V1::BarsController < ApplicationController
       render json: @bar.errors, status: :unprocessable_entity
     end
   end
-  
+
   def update
     handle_image_attachment if bar_params[:image_base64]
 
@@ -50,7 +50,7 @@ class API::V1::BarsController < ApplicationController
     else
       render json: @bar.errors, status: :unprocessable_entity
     end
-  end  
+  end
 
   private
 
@@ -62,7 +62,7 @@ class API::V1::BarsController < ApplicationController
 
   def bar_params
     params.require(:bar).permit(
-      :name, :latitude, :longitude, :image_base64,
+      :name, :latitude, :longitude, :image_base64, :address_id,
       address_attributes: [:user_id, :line1, :line2, :city, country_attributes: [:name]]
     )
   end
@@ -70,5 +70,5 @@ class API::V1::BarsController < ApplicationController
   def handle_image_attachment
     decoded_image = decode_image(bar_params[:image_base64])
     @bar.image.attach(io: decoded_image[:io], filename: decoded_image[:filename], content_type: decoded_image[:content_type])
-  end  
+  end
 end
