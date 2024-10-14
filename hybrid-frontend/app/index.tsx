@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, FlatList, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TextInput, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 interface Beer {
   id: string;
@@ -7,11 +8,12 @@ interface Beer {
   style: string;
 }
 
-export default function BeerSearchScreen() {
+export default function index() {
   const [searchTerm, setSearchTerm] = useState('');
   const [beers, setBeers] = useState<Beer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null); 
+  const router = useRouter();
 
   useEffect(() => {
     if (searchTerm) {
@@ -51,12 +53,19 @@ export default function BeerSearchScreen() {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <FlatList
-          data={filteredBeers}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <Text style={styles.item}>{item.name}</Text>
-          )}
-        />
+        data={beers}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => router.push(`/beer/show?id=${item.id}`)} 
+          >
+            <Text style={styles.item}>
+              {item.name} - {item.style}
+            </Text>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={!loading && <Text>No se encontraron cervezas.</Text>}
+      />
       )}
 
       {error && <Text style={styles.error}>{error}</Text>}
