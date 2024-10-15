@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+
 
 interface Beer {
   id: number;
   name: string;
   style: string;
   alcohol: string;
+  avg_rating: number;
 }
 
 export default function BeerShow() {
@@ -26,7 +30,7 @@ export default function BeerShow() {
         }
         const result = await response.json();
         console.log("Datos recibidos del backend:", result);
-        setBeer(result.beer); // Aquí almacenamos el objeto beer directamente
+        setBeer(result.beer); 
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching beer details:', error);
@@ -59,12 +63,14 @@ export default function BeerShow() {
 
       {beer && (
         <>
-          <Text style={styles.title}>Detalles de la Cerveza {beer.name}</Text>
+          <Text style={styles.title}>
+            Detalles de la Cerveza {beer.name} <Icon name="star" size={20} color="#FFD700" style={{ marginLeft: 5 }} /> {beer.avg_rating ? beer.avg_rating.toFixed(2) : 'N/A'}
+          </Text>
           <Text>Estilo: {beer.style}</Text>
           <Text>Alcohol: {beer.alcohol} </Text>
           <Button 
             title="Hacer una Reseña" 
-            onPress={() => router.push(`/beer/review?id=${id}`)} 
+            onPress={() => router.push(`/beer/${id}/review`)}
           />
         </>
       )}
