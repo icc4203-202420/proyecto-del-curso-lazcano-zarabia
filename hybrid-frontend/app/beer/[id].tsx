@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 interface Beer {
@@ -7,14 +7,15 @@ interface Beer {
   name: string;
   style: string;
   alcohol: string;
-  // Puedes agregar más propiedades según sea necesario
 }
 
 export default function BeerShow() {
   const { id } = useLocalSearchParams(); 
-  const [beer, setBeer] = useState<Beer | null>(null); // beer es un objeto que puede ser null inicialmente
+  const [beer, setBeer] = useState<Beer | null>(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBeerDetails = async () => {
@@ -61,6 +62,10 @@ export default function BeerShow() {
           <Text style={styles.title}>Detalles de la Cerveza {beer.name}</Text>
           <Text>Estilo: {beer.style}</Text>
           <Text>Alcohol: {beer.alcohol} </Text>
+          <Button 
+            title="Hacer una Reseña" 
+            onPress={() => router.push(`/beer/review?id=${id}`)} 
+          />
         </>
       )}
     </View>

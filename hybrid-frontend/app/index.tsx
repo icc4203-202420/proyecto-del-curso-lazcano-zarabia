@@ -57,10 +57,10 @@ export default function index() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/beer/show?id=${item.id}`)} 
+            onPress={() => router.push(`/beer/${item.id}`)} 
           >
             <Text style={styles.item}>
-              {item.name} - {item.style}
+              {item.name}
             </Text>
           </TouchableOpacity>
         )}
