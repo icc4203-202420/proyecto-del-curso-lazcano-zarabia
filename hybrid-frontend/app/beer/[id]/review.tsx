@@ -1,21 +1,37 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Slider from '@react-native-community/slider';
+
+import { Slider } from '@rneui/themed'; 
+import { Icon } from 'react-native-elements';
+import { Picker } from '@react-native-picker/picker';
 
 export default function ReviewBeer() {
-  const { id } = useLocalSearchParams();  // Recibimos el ID de la cerveza
-  const router = useRouter();
-
+  const { id } = useLocalSearchParams();  
+  const router = useRouter()
+  
   const [reviewText, setReviewText] = useState('');
-  const [rating, setRating] = useState(3.0); // Valor inicial del rating
+  const [rating, setRating] = useState(3.0); 
+  const [selectedUser, setSelectedUser] = useState(''); 
+  const [users, setUsers] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async () => {
-    const wordCount = reviewText.trim().split(/\s+/).length; // Contamos las palabras
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch('http://127.0.0.1:3001/api/v1/users');
+        const result = await response.json();
+        setUsers(result.users); 
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    }
 
-    // Validación de las condiciones
-    if (wordCount < 15) {
+    fetchUsers();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (reviewText.split(' ').length < 15) {
       setErrorMessage('La evaluación debe tener al menos 15 palabras.');
       return;
     }
@@ -25,15 +41,19 @@ export default function ReviewBeer() {
       return;
     }
 
-    // Si pasa las validaciones, enviamos la evaluación
-    try {
-      const newReview = {
-        text: reviewText,
-        rating: rating,
-        beer_id: id,
-        // Puedes agregar un campo user_id si es necesario.
-      };
+    if (!selectedUser) {
+      setErrorMessage('Debes seleccionar un usuario.');
+      return;
+    }
 
+    const newReview = {
+      text: reviewText,
+      rating: rating,
+      user_id: selectedUser, 
+      beer_id: id, 
+    };
+
+    try {
       const response = await fetch(`http://127.0.0.1:3001/api/v1/beers/${id}/reviews`, {
         method: 'POST',
         headers: {
@@ -57,7 +77,18 @@ export default function ReviewBeer() {
     <View style={styles.container}>
       <Text style={styles.title}>Escribir evaluación para la Cerveza</Text>
 
-      <Text style={styles.label}>Escribe tu evaluación:</Text>
+      <Text style={styles.label}>Selecciona un usuario:</Text>
+      <Picker
+        selectedValue={selectedUser}
+        onValueChange={(itemValue) => setSelectedUser(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Seleccionar usuario" value="" />
+        {users.map((user) => (
+          <Picker.Item key={user.id} label={user.handle} value={user.id} />
+        ))}
+      </Picker>
+
       <TextInput
         style={styles.input}
         multiline
@@ -68,15 +99,28 @@ export default function ReviewBeer() {
       />
 
       <Text style={styles.label}>Rating: {rating.toFixed(1)}</Text>
-      {Platform.OS !== 'web' && (
-        <Slider
-            value={rating}
-            onValueChange={setRating}
-            minimumValue={1}
-            maximumValue={5}
-            step={0.1}
-        />
-    )}
+      <Slider
+        value={rating}
+        onValueChange={setRating}
+        maximumValue={5}
+        minimumValue={1}
+        step={0.1}
+        allowTouchTrack
+        trackStyle={{ height: 5, backgroundColor: 'transparent' }}
+        thumbStyle={{ height: 20, width: 20, backgroundColor: 'transparent' }}
+        thumbProps={{
+          children: (
+            <Icon
+              name="star"
+              type="font-awesome"
+              size={20}
+              reverse
+              containerStyle={{ bottom: 20, right: 20 }}
+              color="#f50"
+            />
+          ),
+        }}
+      />
 
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
@@ -105,6 +149,9 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
+    marginBottom: 20,
+  },
+  picker: {
     marginBottom: 20,
   },
   error: {

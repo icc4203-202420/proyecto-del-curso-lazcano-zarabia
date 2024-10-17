@@ -32,7 +32,7 @@ export default function index() {
           setLoading(false);
         });
     } else {
-      setBeers([]); // Si no hay búsqueda, no mostrar ninguna cerveza
+      setBeers([]); 
     }
   }, [searchTerm]);
 

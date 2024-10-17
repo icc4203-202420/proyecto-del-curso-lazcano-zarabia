@@ -55,7 +55,7 @@ const LoginScreen = ({ tokenHandler }: Props) => {
       const receivedToken = response.headers.authorization.split(' ')[1];
 
       if (receivedToken) {
-        tokenHandler(receivedToken);  // Aquí estamos usando tokenHandler
+        tokenHandler(receivedToken);  
         setServerError(''); 
         navigation.navigate('index'); 
       } else {

@@ -10,7 +10,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../types/navigation'; 
 
-// Definir los tipos de los valores del formulario
 interface RegisterFormValues {
   first_name: string;
   last_name: string;
@@ -20,7 +19,6 @@ interface RegisterFormValues {
   password_confirmation: string;
 }
 
-// Validaciones de Yup
 const validationSchema = Yup.object({
   first_name: Yup.string().required('El nombre es requerido'),
   last_name: Yup.string().required('El apellido es requerido'),
@@ -32,7 +30,6 @@ const validationSchema = Yup.object({
     .required('Repetir la contraseña es requerido'),
 });
 
-// Valores iniciales
 const initialValues: RegisterFormValues = {
   first_name: '',
   last_name: '',
@@ -42,17 +39,15 @@ const initialValues: RegisterFormValues = {
   password_confirmation: '',
 };
 
-// Configuración de axios con axios-hooks
+
 axios.defaults.baseURL = 'http://127.0.0.1:3001/api/v1';
 
 const RegistrationForm = () => {
   const [serverError, setServerError] = useState(''); 
 
-  // Definir el tipo de la navegación correctamente
   type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'register'>;
   const navigation = useNavigation<NavigationProp>();
 
-  // Definir el hook para la petición POST
   const [{ data, loading, error }, executePost] = useAxios(
     {
       url: '/users',
@@ -66,7 +61,7 @@ const RegistrationForm = () => {
     try {
       const response = await executePost({ data: qs.stringify({ user: values }) });
       setServerError('');
-      navigation.navigate('login');  // Redirigir a la pantalla de login
+      navigation.navigate('login');  
     } catch (err: any) {
       if (err.response && err.response.status === 409) {
         setServerError('Correo electrónico ya registrado.');

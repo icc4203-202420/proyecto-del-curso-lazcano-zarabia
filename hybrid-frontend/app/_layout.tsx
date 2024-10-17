@@ -7,7 +7,7 @@ import { useFonts } from 'expo-font';
 export default function RootLayout() {
   
   const [fontsLoaded] = useFonts({
-    'Chococooky': require('@/assets/fonts/Chococooky.ttf'), // Ruta a la fuente
+    'Chococooky': require('@/assets/fonts/Chococooky.ttf'), 
   });
 
   if (!fontsLoaded) {
