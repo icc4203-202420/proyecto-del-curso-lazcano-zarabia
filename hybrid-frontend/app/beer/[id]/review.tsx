@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Slider } from '@rneui/themed'; 
 import { Icon } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
+import Toast from 'react-native-toast-message'; // Importa el componente Toast
 
 export default function ReviewBeer() {
   const { id } = useLocalSearchParams();  
+  const router = useRouter();
+
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(3.0);
   const [selectedUser, setSelectedUser] = useState('');
@@ -72,16 +75,24 @@ export default function ReviewBeer() {
       });
 
       if (response.ok) {
-        Alert.alert('Éxito', 'La evaluación ha sido enviada con éxito');
-        // Actualizar el estado local para mostrar la nueva reseña
         const createdReview = await response.json();
-        setReviews([...reviews, createdReview]); // Añadir la nueva reseña al final de la lista
-        // Limpiar el formulario
+        setReviews([...reviews, createdReview]);
         setReviewText('');
         setRating(3.0);
         setSelectedUser('');
+
+        // Muestra el toast de éxito
+        Toast.show({
+          type: 'success',
+          text1: 'Éxito',
+          text2: 'La evaluación ha sido enviada con éxito 👏',
+        });
       } else {
-        Alert.alert('Error', 'Error al enviar la evaluación');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Error al enviar la evaluación 😢',
+        });
       }
     } catch (error) {
       setErrorMessage('Hubo un error enviando la evaluación.');
@@ -159,6 +170,9 @@ export default function ReviewBeer() {
           )}
         />
       )}
+
+      {/* Agrega el componente Toast */}
+      <Toast />
     </View>
   );
 }
