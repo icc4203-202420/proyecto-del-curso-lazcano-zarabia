@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Slider } from '@rneui/themed'; 
 import { Icon } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 
 export default function ReviewBeer() {
   const { id } = useLocalSearchParams();  
-  const router = useRouter();
-
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(3.0);
   const [selectedUser, setSelectedUser] = useState('');
   const [users, setUsers] = useState([]);
-  const [reviews, setReviews] = useState([]); // Estado para almacenar las reseñas existentes
+  const [reviews, setReviews] = useState([]); 
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -31,14 +29,14 @@ export default function ReviewBeer() {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/v1/beers/${id}/reviews`);
         const result = await response.json();
-        setReviews(result); // Asegúrate de que el formato coincida con la respuesta de tu API
+        setReviews(result); 
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }
     }
 
     fetchUsers();
-    fetchReviews(); // Carga las reseñas existentes cuando el componente se monta
+    fetchReviews(); 
   }, [id]);
 
   const handleSubmit = async () => {
@@ -75,7 +73,13 @@ export default function ReviewBeer() {
 
       if (response.ok) {
         Alert.alert('Éxito', 'La evaluación ha sido enviada con éxito');
-        router.push(`/beer/${id}`);
+        // Actualizar el estado local para mostrar la nueva reseña
+        const createdReview = await response.json();
+        setReviews([...reviews, createdReview]); // Añadir la nueva reseña al final de la lista
+        // Limpiar el formulario
+        setReviewText('');
+        setRating(3.0);
+        setSelectedUser('');
       } else {
         Alert.alert('Error', 'Error al enviar la evaluación');
       }
@@ -137,7 +141,6 @@ export default function ReviewBeer() {
 
       <Button title="Enviar Evaluación" onPress={handleSubmit} />
 
-      {/* Sección para mostrar las reseñas existentes */}
       <Text style={styles.label}>Reseñas existentes:</Text>
       {reviews.length === 0 ? (
         <Text>No hay reseñas para esta cerveza.</Text>
