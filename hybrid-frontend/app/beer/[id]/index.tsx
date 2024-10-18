@@ -69,7 +69,7 @@ export default function BeerShow() {
           <Text>Estilo: {beer.style}</Text>
           <Text>Alcohol: {beer.alcohol} </Text>
           <Button 
-            title="Hacer una Reseña" 
+            title="Reseñas" 
             onPress={() => router.push(`/beer/${id}/review`)}
           />
         </>

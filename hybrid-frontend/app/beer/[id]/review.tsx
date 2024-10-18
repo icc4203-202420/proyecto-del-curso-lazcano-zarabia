@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-
 import { Slider } from '@rneui/themed'; 
 import { Icon } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 
 export default function ReviewBeer() {
   const { id } = useLocalSearchParams();  
-  const router = useRouter()
-  
+  const router = useRouter();
+
   const [reviewText, setReviewText] = useState('');
-  const [rating, setRating] = useState(3.0); 
-  const [selectedUser, setSelectedUser] = useState(''); 
+  const [rating, setRating] = useState(3.0);
+  const [selectedUser, setSelectedUser] = useState('');
   const [users, setUsers] = useState([]);
+  const [reviews, setReviews] = useState([]); // Estado para almacenar las reseñas existentes
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -21,14 +21,25 @@ export default function ReviewBeer() {
       try {
         const response = await fetch('http://127.0.0.1:3001/api/v1/users');
         const result = await response.json();
-        setUsers(result.users); 
+        setUsers(result.users);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     }
 
+    async function fetchReviews() {
+      try {
+        const response = await fetch(`http://127.0.0.1:3001/api/v1/beers/${id}/reviews`);
+        const result = await response.json();
+        setReviews(result); // Asegúrate de que el formato coincida con la respuesta de tu API
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    }
+
     fetchUsers();
-  }, []);
+    fetchReviews(); // Carga las reseñas existentes cuando el componente se monta
+  }, [id]);
 
   const handleSubmit = async () => {
     if (reviewText.split(' ').length < 15) {
@@ -49,8 +60,8 @@ export default function ReviewBeer() {
     const newReview = {
       text: reviewText,
       rating: rating,
-      user_id: selectedUser, 
-      beer_id: id, 
+      user_id: selectedUser,
+      beer_id: id,
     };
 
     try {
@@ -125,6 +136,26 @@ export default function ReviewBeer() {
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
       <Button title="Enviar Evaluación" onPress={handleSubmit} />
+
+      {/* Sección para mostrar las reseñas existentes */}
+      <Text style={styles.label}>Reseñas existentes:</Text>
+      {reviews.length === 0 ? (
+        <Text>No hay reseñas para esta cerveza.</Text>
+      ) : (
+        <FlatList
+          data={reviews}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.reviewItem}>
+              <Text style={styles.reviewText}>
+                Usuario: {users.find((user) => user.id === item.user_id)?.handle || 'Desconocido'}
+              </Text>
+              <Text style={styles.reviewText}>Rating: {item.rating}</Text>
+              <Text style={styles.reviewText}>{item.text}</Text>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 }
@@ -140,9 +171,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  label: {
-    fontSize: 18,
-    marginBottom: 10,
+  picker: {
+    marginBottom: 20,
   },
   input: {
     borderWidth: 1,
@@ -151,11 +181,21 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
   },
-  picker: {
-    marginBottom: 20,
+  label: {
+    fontSize: 18,
+    marginBottom: 10,
   },
   error: {
     color: 'red',
     marginBottom: 20,
+  },
+  reviewItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 10,
+  },
+  reviewText: {
+    fontSize: 16,
   },
 });
