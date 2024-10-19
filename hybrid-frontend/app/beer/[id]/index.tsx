@@ -10,13 +10,19 @@ interface Bar {
   longitude: number;
 }
 
+interface Brewery {
+  id: number;
+  name: string;
+}
+
 interface Beer {
   id: number;
   name: string;
   style: string;
   alcohol: string;
   avg_rating: number;
-  bars: Bar[];
+  bars: Bar[]; // Lista de bares
+  breweries: Brewery[]; // Lista de cervecerías
 }
 
 export default function BeerShow() {
@@ -86,12 +92,30 @@ export default function BeerShow() {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.barItem}>
-                  <Text style={styles.barText}>- {item.name}</Text>
+                  <Text style={styles.barText}>Nombre: {item.name}</Text>
+                  <Text style={styles.barText}>Latitud: {item.latitude}</Text>
+                  <Text style={styles.barText}>Longitud: {item.longitude}</Text>
                 </View>
               )}
             />
           ) : (
             <Text>No se han encontrado bares que sirvan esta cerveza.</Text>
+          )}
+
+          {/* Sección para mostrar las cervecerías */}
+          <Text style={styles.subtitle}>Cervecerías:</Text>
+          {beer.breweries.length > 0 ? (
+            <FlatList
+              data={beer.breweries}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.breweryItem}>
+                  <Text style={styles.breweryText}>Nombre: {item.name}</Text>
+                </View>
+              )}
+            />
+          ) : (
+            <Text>No se ha encontrado una cervecería asociada.</Text>
           )}
         </>
       )}
@@ -121,6 +145,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   barText: {
+    fontSize: 16,
+  },
+  breweryItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  breweryText: {
     fontSize: 16,
   },
 });

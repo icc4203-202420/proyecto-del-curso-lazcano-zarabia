@@ -27,6 +27,7 @@ class API::V1::BeersController < ApplicationController
       render json: { error: 'Beer not found' }, status: :not_found
     else
       bars = @beer.bars.as_json(only: [:id, :name, :latitude, :longitude])  # Obtenemos los bares relacionados
+      breweries = @beer.breweries.as_json(only: [:id, :name])  # Obtenemos las cervecerías relacionadas
 
       if @beer.image.attached?
         render json: @beer.as_json.merge({
@@ -35,7 +36,7 @@ class API::V1::BeersController < ApplicationController
           bars: bars  # Añadimos los bares a la respuesta
         }), status: :ok
       else
-        render json: { beer: @beer.as_json.merge({ bars: bars }) }, status: :ok
+        render json: { beer: @beer.as_json.merge({ bars: bars }, {breweries: breweries}) }, status: :ok
       end
     end
   end
