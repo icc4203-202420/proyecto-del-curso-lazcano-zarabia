@@ -1,0 +1,3 @@
+El archivo 1.1.rp contiene el diseño de la interfaz, elaborado mediante la aplicación Axure.
+
+La aplicación incluye todos los elementos solicitados para la entrega 1.1. Está dividida en dos páginas para facilitar su creación. La primera página aborda el proceso de descarga de la aplicación, así como el inicio de sesión o la creación de una cuenta. La segunda página abarca todo lo demás, incluyendo las interacciones básicas requeridas según el enunciado.

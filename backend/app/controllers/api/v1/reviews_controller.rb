@@ -1,12 +1,18 @@
 class API::V1::ReviewsController < ApplicationController
   respond_to :json
-  before_action :set_user, only: [:index, :create]
+  #before_action :set_user, only: [:index, :create]
   before_action :set_review, only: [:show, :update, :destroy]
 
   def index
-    @reviews = Review.where(user: @user)
-    render json: { reviews: @reviews }, status: :ok
+    beer = Beer.find(params[:beer_id]) # Encuentra la cerveza por su ID
+    reviews = beer.reviews # Obtiene todas las reseñas asociadas a esa cerveza
+    render json: reviews # Devuelve las reseñas en formato JSON
   end
+
+  # def index
+  #   @reviews = Review.where(user: @user)
+  #   render json: { reviews: @reviews }, status: :ok
+  # end
 
   def show
     if @review
@@ -17,11 +23,13 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def create
-    @review = @user.reviews.build(review_params)
+    beer = Beer.find(params[:beer_id])
+    @review = beer.reviews.build(review_params)
+
     if @review.save
-      render json: @review, status: :created, location: api_v1_review_url(@review)
+      render json: @review, status: :created
     else
-      render json: @review.errors, status: :unprocessable_entity
+      render json: { errors: @review.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -45,11 +53,12 @@ class API::V1::ReviewsController < ApplicationController
     render json: { error: "Review not found" }, status: :not_found unless @review
   end
 
-  def set_user
-    @user = User.find(params[:user_id]) 
-  end
+  # def set_user
+  #   @user = User.find(params[:user_id])
+  # end
 
   def review_params
-    params.require(:review).permit(:id, :text, :rating, :beer_id)
+    params.require(:review).permit(:text, :rating, :beer_id, :user_id)
   end
+
 end
