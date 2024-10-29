@@ -6,12 +6,21 @@ import { useRouter } from 'expo-router';
 interface Beer {
   id: string;
   name: string;
-  style: string;
+  type: 'beer';
 }
+
+interface User {
+  id: string;
+  handle: string;
+  name: string;
+  type: 'user';
+}
+
+type SearchResult = Beer | User;
 
 export default function index() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [beers, setBeers] = useState<Beer[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -29,21 +38,34 @@ export default function index() {
   useEffect(() => {
     if (searchTerm) {
       setLoading(true);
-      fetch(`http://127.0.0.1:3001/api/v1/beers`)
-        .then((response) => response.json())
-        .then((data) => {
-          const filteredBeers = data.beers.filter((beer: any) =>
-            beer.name.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-          setBeers(filteredBeers);
+      setError(null);
+
+      // Hacer ambas solicitudes a la API
+      Promise.all([
+        fetch(`http://127.0.0.1:3001/api/v1/beers`).then((response) => response.json()),
+        fetch(`http://127.0.0.1:3001/api/v1/users`).then((response) => response.json()),
+      ])
+        .then(([beersData, usersData]) => {
+          // Filtrar y estructurar los resultados de cervezas
+          const filteredBeers = beersData.beers
+            .filter((beer: any) => beer.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            .map((beer: any) => ({ ...beer, type: 'beer' }));
+
+          // Filtrar y estructurar los resultados de usuarios
+          const filteredUsers = usersData.users
+            .filter((user: any) => user.handle.toLowerCase().includes(searchTerm.toLowerCase()))
+            .map((user: any) => ({ ...user, type: 'user' }));
+
+          // Combinar los resultados
+          setResults([...filteredBeers, ...filteredUsers]);
           setLoading(false);
         })
         .catch(() => {
-          setError('Error fetching beers');
+          setError('Error al buscar cervezas y usuarios');
           setLoading(false);
         });
     } else {
-      setBeers([]);
+      setResults([]);
     }
   }, [searchTerm]);
 
@@ -60,16 +82,20 @@ export default function index() {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <FlatList
-          data={beers}
-          keyExtractor={(item) => item.id.toString()}
+          data={results}
+          keyExtractor={(item) => `${item.type}-${item.id}`}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => router.push(`/beer/${item.id}`)}
+              onPress={() =>
+                item.type === 'beer' ? router.push(`/beer/${item.id}`) : router.push(`/user/${item.id}`)
+              }
             >
-              <Text style={styles.item}>{item.name}</Text>
+              <Text style={styles.item}>
+                {item.type === 'beer' ? `🍺 ${item.name}` : `👤 ${item.handle}`}
+              </Text>
             </TouchableOpacity>
           )}
-          ListEmptyComponent={!loading && <Text>No se encontraron cervezas.</Text>}
+          ListEmptyComponent={!loading && <Text>No se encontraron resultados.</Text>}
         />
       )}
 
