@@ -1,29 +1,17 @@
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-
 import { Stack } from "expo-router";
 import { useFonts } from 'expo-font';
+import { UserProvider } from '@/context/UserContext'; // Importa el UserProvider
 
 export default function RootLayout() {
-  
-  const [fontsLoaded] = useFonts({
-    'Chococooky': require('@/assets/fonts/Chococooky.ttf'), 
-  });
-
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-  
-  
   return (
-    <Stack>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
-    </Stack>
+    <UserProvider> 
+      <Stack>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+      </Stack>
+    </UserProvider>
   );
 }

@@ -30,6 +30,7 @@ Rails.application.routes.draw do
       end
       resources :bars do
         resources :events, only: [:index, :show], controller: 'events', action: :index_by_bar
+        get 'events/attendance/:user_id', to: 'events#events_with_attendance', on: :member
       end
       resources :beers do
         resources :reviews, only: [:index, :create]
@@ -39,6 +40,7 @@ Rails.application.routes.draw do
         resources :friendships, only: [:index, :show]
       end
       resources :events do
+        get '/user/:user_id', to: 'attendances#user_attendances', on: :member
         resources :attendances, only: [:create]
         get 'attendances', to: 'attendances#index_by_event'
         get :event_pictures

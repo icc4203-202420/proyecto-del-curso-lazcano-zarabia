@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, FlatList, Button, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useUser } from '@/context/UserContext';
 
 interface Bar {
     id: string;
@@ -11,13 +12,13 @@ interface Bar {
 }
 
 interface Event {
-  id: string;
-  name: string;
-  description: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  // Agrega otros campos según los datos que tengas para el evento
+    id: string;
+    name: string;
+    description: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    checked_in?: boolean; 
 }
 
 export default function BarDetail() {
@@ -25,11 +26,11 @@ export default function BarDetail() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const { userId } = useUser(); 
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // ID del bar de los parámetros de la URL
+  const { id } = useLocalSearchParams(); 
 
   useEffect(() => {
-    // Función para obtener los datos del bar
     const fetchBarData = async () => {
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}`);
@@ -46,13 +47,14 @@ export default function BarDetail() {
         setLoading(false);
       }
     };
-
+  
     const fetchEvents = async () => {
+      if (!userId) return; // Asegura que userId esté definido antes de hacer el fetch
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}/events`);
+        const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}/events/attendance/${userId}`);
         if (response.ok) {
           const data = await response.json();
-          setEvents(data); 
+          setEvents(data);
         } else {
           Alert.alert('Error', 'No se pudo obtener los eventos del bar');
         }
@@ -63,10 +65,50 @@ export default function BarDetail() {
         setEventsLoading(false);
       }
     };
-
+  
     fetchBarData();
-    fetchEvents();
-  }, [id]);
+  
+    // Ejecuta fetchEvents solo si userId está disponible
+    if (userId) {
+      fetchEvents();
+    }
+  }, [id, userId]);
+  
+
+  // Función para confirmar asistencia a un evento
+  const confirmAttendance = async (eventId: string) => {
+    if (!userId) {
+      Alert.alert('Error', 'No se pudo obtener el ID del usuario');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:3001/api/v1/events/${eventId}/attendances`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            user_id: userId,
+            event_id: eventId }), // Envía el userId desde el contexto
+      });
+
+
+      if (response.ok) {
+        Alert.alert('Asistencia confirmada', '¡Has confirmado tu asistencia a este evento!');
+        setEvents(prevEvents =>
+          prevEvents.map(event =>
+            event.id === eventId ? { ...event, checked_in: true } : event
+          )
+        );
+      } else {
+        Alert.alert('Error', 'No se pudo confirmar la asistencia');
+      }
+    } catch (error) {
+      console.error('Error al confirmar asistencia:', error);
+      Alert.alert('Error', 'Ocurrió un error al confirmar la asistencia');
+    }
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -76,7 +118,7 @@ export default function BarDetail() {
     <View style={styles.container}>
       {bar ? (
         <>
-          <h1>Nombre bar: {bar.name}</h1>
+          <Text style={styles.text}>Nombre bar: {bar.name}</Text>
         </>
       ) : (
         <Text>No se encontró la información del bar.</Text>
@@ -87,18 +129,33 @@ export default function BarDetail() {
       {eventsLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : bar.events_count > 0 ? (
-        <FlatList
-          data={events}
-          keyExtractor={(event) => event.id}
-          renderItem={({ item }) => (
-            <View style={styles.eventItem}>
-              <Text style={styles.eventName}>{item.name}</Text>
-              <Text style={styles.eventDescription}>{item.description}</Text>
-              <Text style={styles.eventDate}>Fecha: {item.date}</Text>
-              <Text style={styles.eventTime}>Hora: {item.start_time} - {item.end_time}</Text>
-            </View>
-          )}
-        />
+            <FlatList
+            data={events}
+            keyExtractor={(event) => event.id}
+            renderItem={({ item }) => {
+                console.log("Checked in status for event:", item.id, "=", item.checked_in, "User: ", userId); // Verifica el valor de item.checked_in en la consola
+                
+                return (
+                <View style={styles.eventItem}>
+                    <Text style={styles.eventName}>{item.name}</Text>
+                    <Text style={styles.eventDescription}>{item.description}</Text>
+                    <Text style={styles.eventDate}>Fecha: {item.date}</Text>
+
+                    {item.checked_in ? (
+                    <Text style={styles.attendingText}>Asistencia confirmada</Text>
+                    ) : (
+                    <TouchableOpacity
+                        style={styles.attendButton}
+                        onPress={() => confirmAttendance(item.id)}
+                    >
+                        <Text style={styles.attendButtonText}>Confirmar Asistencia</Text>
+                    </TouchableOpacity>
+                    )}
+                </View>
+                );
+            }}
+            />
+
       ) : (
         <Text style={styles.noEventsText}>No hay eventos programados para este bar.</Text>
       )}
@@ -145,6 +202,21 @@ const styles = StyleSheet.create({
   eventTime: {
     fontSize: 16,
     color: '#333',
+  },
+  attendButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  attendButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+  },
+  attendingText: {
+    fontSize: 16,
+    color: 'green',
+    marginTop: 10,
   },
   noEventsText: {
     fontSize: 16,

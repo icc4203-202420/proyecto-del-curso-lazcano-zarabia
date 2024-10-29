@@ -11,6 +11,29 @@ class API::V1::EventsController < ApplicationController
     render json: @event
   end
 
+  def events_with_attendance
+    bar = Bar.find_by(id: params[:id])
+    user_id = params[:user_id]
+
+    if bar
+      # Obtener todos los eventos del bar
+      events = bar.events
+
+      # Agregar el estado de asistencia para cada evento
+      events_with_attendance = events.map do |event|
+        # Buscar si el usuario tiene una asistencia confirmada para este evento
+        attendance = Attendance.find_by(user_id: user_id, event_id: event.id)
+        event_attributes = event.attributes
+        event_attributes[:checked_in] = attendance.present? && attendance.checked_in
+        event_attributes
+      end
+
+      render json: events_with_attendance
+    else
+      render json: { error: "Bar no encontrado" }, status: :not_found
+    end
+  end
+
   def event_pictures
     @event = Event.find(params[:event_id])
     pictures = @event.event_pictures.map do |picture|
