@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, TextInput, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Button } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 interface Beer {
@@ -12,8 +13,18 @@ export default function index() {
   const [searchTerm, setSearchTerm] = useState('');
   const [beers, setBeers] = useState<Beer[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null); 
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Verificar si el usuario está autenticado
+  const checkAuthentication = async () => {
+    const token = await AsyncStorage.getItem('authToken');
+    if (token) {
+      router.push('/profile'); // Redirige al perfil si está logueado
+    } else {
+      router.push('/login'); // Redirige al login si no está logueado
+    }
+  };
 
   useEffect(() => {
     if (searchTerm) {
@@ -32,19 +43,15 @@ export default function index() {
           setLoading(false);
         });
     } else {
-      setBeers([]); 
+      setBeers([]);
     }
   }, [searchTerm]);
-
-  const filteredBeers = beers.filter((beer) =>
-    beer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Introduce un termino de busqueda..."
+        placeholder="Introduce un término de búsqueda..."
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
@@ -53,22 +60,23 @@ export default function index() {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <FlatList
-        data={beers}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => router.push(`/beer/${item.id}`)} 
-          >
-            <Text style={styles.item}>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={!loading && <Text>No se encontraron cervezas.</Text>}
-      />
+          data={beers}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/beer/${item.id}`)}
+            >
+              <Text style={styles.item}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={!loading && <Text>No se encontraron cervezas.</Text>}
+        />
       )}
 
       {error && <Text style={styles.error}>{error}</Text>}
+
+      {/* Botón para ir al perfil o login */}
+      <Button title="Ir a Perfil" onPress={checkAuthentication} />
     </View>
   );
 }

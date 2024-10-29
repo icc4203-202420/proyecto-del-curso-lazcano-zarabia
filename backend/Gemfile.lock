@@ -197,6 +197,7 @@ GEM
     nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
     orm_adapter (0.5.0)
+    pg (1.5.9)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -339,6 +340,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   jbuilder
   jsonapi-serializer
+  pg
   pry (~> 0.14.2)
   pry-byebug
   pry-rails

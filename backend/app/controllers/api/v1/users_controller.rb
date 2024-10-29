@@ -2,6 +2,13 @@ class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update]
 
+  def me
+    if current_user
+      render json: current_user, status: :ok
+    else
+      render json: { error: "Usuario no encontrado" }, status: :not_found
+    end
+  end
 
   def index
     @users = User.includes(:reviews, :address).all
