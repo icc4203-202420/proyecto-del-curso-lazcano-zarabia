@@ -8,7 +8,7 @@ class Bar < ApplicationRecord
 
   has_one_attached :image
 
-  accepts_nested_attributes_for :address 
+  accepts_nested_attributes_for :address
 
   validates :name, presence: true
   validates :image, content_type: { in: ['image/png', 'image/jpg', 'image/jpeg'],

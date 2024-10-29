@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  belongs_to :bar
+  belongs_to :bar, counter_cache: true
   has_many :attendances
   has_many :users, through: :attendances
 

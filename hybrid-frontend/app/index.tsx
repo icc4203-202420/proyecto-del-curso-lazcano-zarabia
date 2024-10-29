@@ -16,7 +16,13 @@ interface User {
   type: 'user';
 }
 
-type SearchResult = Beer | User;
+interface Bar {
+  id: string;
+  name: string;
+  type: 'bar';
+}
+
+type SearchResult = Beer | User | Bar;
 
 export default function index() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,12 +46,13 @@ export default function index() {
       setLoading(true);
       setError(null);
 
-      // Hacer ambas solicitudes a la API
+      // Hacer las tres solicitudes a la API
       Promise.all([
         fetch(`http://127.0.0.1:3001/api/v1/beers`).then((response) => response.json()),
         fetch(`http://127.0.0.1:3001/api/v1/users`).then((response) => response.json()),
+        fetch(`http://127.0.0.1:3001/api/v1/bars`).then((response) => response.json()),
       ])
-        .then(([beersData, usersData]) => {
+        .then(([beersData, usersData, barsData]) => {
           // Filtrar y estructurar los resultados de cervezas
           const filteredBeers = beersData.beers
             .filter((beer: any) => beer.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -56,12 +63,17 @@ export default function index() {
             .filter((user: any) => user.handle.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((user: any) => ({ ...user, type: 'user' }));
 
+          // Filtrar y estructurar los resultados de bares
+          const filteredBars = barsData.bars
+            .filter((bar: any) => bar.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            .map((bar: any) => ({ ...bar, type: 'bar' }));
+
           // Combinar los resultados
-          setResults([...filteredBeers, ...filteredUsers]);
+          setResults([...filteredBeers, ...filteredUsers, ...filteredBars]);
           setLoading(false);
         })
         .catch(() => {
-          setError('Error al buscar cervezas y usuarios');
+          setError('Error al buscar cervezas, usuarios y bares');
           setLoading(false);
         });
     } else {
@@ -87,11 +99,15 @@ export default function index() {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() =>
-                item.type === 'beer' ? router.push(`/beer/${item.id}`) : router.push(`/user/${item.id}`)
+                item.type === 'beer'
+                  ? router.push(`/beer/${item.id}`)
+                  : item.type === 'user'
+                  ? router.push(`/user/${item.id}`)
+                  : router.push(`/bar/${item.id}`) // Ruta para los bares
               }
             >
               <Text style={styles.item}>
-                {item.type === 'beer' ? `🍺 ${item.name}` : `👤 ${item.handle}`}
+                {item.type === 'beer' ? `🍺 ${item.name}` : item.type === 'user' ? `👤 ${item.handle}` : `🏠 ${item.name}`}
               </Text>
             </TouchableOpacity>
           )}
