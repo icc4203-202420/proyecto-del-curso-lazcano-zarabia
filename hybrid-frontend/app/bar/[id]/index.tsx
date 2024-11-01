@@ -4,21 +4,21 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 
 interface Bar {
-    id: string;
-    name: string;
-    address: string;
-    description: string;
-    events_count: number;
+  id: string;
+  name: string;
+  address: string;
+  description: string;
+  events_count: number;
 }
 
 interface Event {
-    id: string;
-    name: string;
-    description: string;
-    date: string;
-    start_time: string;
-    end_time: string;
-    checked_in?: boolean; 
+  id: string;
+  name: string;
+  description: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  checked_in?: boolean; 
 }
 
 export default function BarDetail() {
@@ -26,9 +26,9 @@ export default function BarDetail() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
-  const { userId } = useUser(); 
+  const { userId } = useUser();
   const router = useRouter();
-  const { id } = useLocalSearchParams(); 
+  const { id } = useLocalSearchParams();
 
   useEffect(() => {
     const fetchBarData = async () => {
@@ -47,9 +47,9 @@ export default function BarDetail() {
         setLoading(false);
       }
     };
-  
+
     const fetchEvents = async () => {
-      if (!userId) return; // Asegura que userId esté definido antes de hacer el fetch
+      if (!userId) return;
       try {
         const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}/events/attendance/${userId}`);
         if (response.ok) {
@@ -65,17 +65,14 @@ export default function BarDetail() {
         setEventsLoading(false);
       }
     };
-  
+
     fetchBarData();
-  
-    // Ejecuta fetchEvents solo si userId está disponible
+
     if (userId) {
       fetchEvents();
     }
   }, [id, userId]);
-  
 
-  // Función para confirmar asistencia a un evento
   const confirmAttendance = async (eventId: string) => {
     if (!userId) {
       Alert.alert('Error', 'No se pudo obtener el ID del usuario');
@@ -88,11 +85,8 @@ export default function BarDetail() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-            user_id: userId,
-            event_id: eventId }), // Envía el userId desde el contexto
+        body: JSON.stringify({ user_id: userId, event_id: eventId }),
       });
-
 
       if (response.ok) {
         Alert.alert('Asistencia confirmada', '¡Has confirmado tu asistencia a este evento!');
@@ -125,37 +119,34 @@ export default function BarDetail() {
       )}
 
       <Text style={styles.sectionTitle}>Eventos en este Bar</Text>
-      
+
       {eventsLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : bar.events_count > 0 ? (
-            <FlatList
-            data={events}
-            keyExtractor={(event) => event.id}
-            renderItem={({ item }) => {
-                console.log("Checked in status for event:", item.id, "=", item.checked_in, "User: ", userId); // Verifica el valor de item.checked_in en la consola
-                
-                return (
-                <View style={styles.eventItem}>
-                    <Text style={styles.eventName}>{item.name}</Text>
-                    <Text style={styles.eventDescription}>{item.description}</Text>
-                    <Text style={styles.eventDate}>Fecha: {item.date}</Text>
+        <FlatList
+          data={events}
+          keyExtractor={(event) => event.id}
+          renderItem={({ item }) => (
+            <View style={styles.eventItem}>
+              <TouchableOpacity onPress={() => router.push(`/event/${item.id}`)}>
+                <Text style={styles.eventName}>{item.name}</Text>
+              </TouchableOpacity>
+              <Text style={styles.eventDescription}>{item.description}</Text>
+              <Text style={styles.eventDate}>Fecha: {item.date}</Text>
 
-                    {item.checked_in ? (
-                    <Text style={styles.attendingText}>Asistencia confirmada</Text>
-                    ) : (
-                    <TouchableOpacity
-                        style={styles.attendButton}
-                        onPress={() => confirmAttendance(item.id)}
-                    >
-                        <Text style={styles.attendButtonText}>Confirmar Asistencia</Text>
-                    </TouchableOpacity>
-                    )}
-                </View>
-                );
-            }}
-            />
-
+              {item.checked_in ? (
+                <Text style={styles.attendingText}>Asistencia confirmada</Text>
+              ) : (
+                <TouchableOpacity
+                  style={styles.attendButton}
+                  onPress={() => confirmAttendance(item.id)}
+                >
+                  <Text style={styles.attendButtonText}>Confirmar Asistencia</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        />
       ) : (
         <Text style={styles.noEventsText}>No hay eventos programados para este bar.</Text>
       )}
@@ -189,6 +180,7 @@ const styles = StyleSheet.create({
   eventName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#007bff',
   },
   eventDescription: {
     fontSize: 16,
@@ -196,10 +188,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   eventDate: {
-    fontSize: 16,
-    color: '#333',
-  },
-  eventTime: {
     fontSize: 16,
     color: '#333',
   },
