@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, FlatList, Button, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useUser } from '@/context/UserContext';
+import axiosInstance from '@/config/axiosInstance'; // Asegúrate de importar tu instancia de Axios
 
 interface Bar {
   id: string;
@@ -18,7 +19,7 @@ interface Event {
   date: string;
   start_time: string;
   end_time: string;
-  checked_in?: boolean; 
+  checked_in?: boolean;
 }
 
 export default function BarDetail() {
@@ -33,16 +34,11 @@ export default function BarDetail() {
   useEffect(() => {
     const fetchBarData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setBar(data.bar);
-        } else {
-          Alert.alert('Error', 'No se pudo obtener la información del bar');
-        }
+        const response = await axiosInstance.get(`/api/v1/bars/${id}`);
+        setBar(response.data.bar);
       } catch (error) {
         console.error('Error al obtener el bar:', error);
-        Alert.alert('Error', 'Ocurrió un error al obtener la información del bar');
+        Alert.alert('Error', 'No se pudo obtener la información del bar');
       } finally {
         setLoading(false);
       }
@@ -51,16 +47,11 @@ export default function BarDetail() {
     const fetchEvents = async () => {
       if (!userId) return;
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/v1/bars/${id}/events/attendance/${userId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setEvents(data);
-        } else {
-          Alert.alert('Error', 'No se pudo obtener los eventos del bar');
-        }
+        const response = await axiosInstance.get(`/api/v1/bars/${id}/events/attendance/${userId}`);
+        setEvents(response.data);
       } catch (error) {
         console.error('Error al obtener los eventos:', error);
-        Alert.alert('Error', 'Ocurrió un error al obtener los eventos');
+        Alert.alert('Error', 'No se pudo obtener los eventos del bar');
       } finally {
         setEventsLoading(false);
       }
@@ -80,15 +71,12 @@ export default function BarDetail() {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:3001/api/v1/events/${eventId}/attendances`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_id: userId, event_id: eventId }),
+      const response = await axiosInstance.post(`/api/v1/events/${eventId}/attendances`, {
+        user_id: userId,
+        event_id: eventId,
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         Alert.alert('Asistencia confirmada', '¡Has confirmado tu asistencia a este evento!');
         setEvents(prevEvents =>
           prevEvents.map(event =>
@@ -122,7 +110,7 @@ export default function BarDetail() {
 
       {eventsLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
-      ) : bar.events_count > 0 ? (
+      ) : bar?.events_count > 0 ? (
         <FlatList
           data={events}
           keyExtractor={(event) => event.id}

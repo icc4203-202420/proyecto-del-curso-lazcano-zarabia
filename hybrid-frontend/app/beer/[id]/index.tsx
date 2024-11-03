@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axiosInstance from '@/config/axiosInstance'; // Asegúrate de importar axiosInstance
 
 interface Bar {
   id: number;
@@ -36,13 +37,9 @@ export default function BeerShow() {
   useEffect(() => {
     const fetchBeerDetails = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:3001/api/v1/beers/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch beer details');
-        }
-        const result = await response.json();
-        console.log("Datos recibidos del backend:", result);
-        setBeer(result.beer); 
+        const response = await axiosInstance.get(`/api/v1/beers/${id}`);
+        console.log("Datos recibidos del backend:", response.data);
+        setBeer(response.data.beer); 
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching beer details:', error);

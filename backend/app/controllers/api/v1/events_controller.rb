@@ -119,30 +119,26 @@ class API::V1::EventsController < ApplicationController
   end
 
   def add_images
-    if params[:flyers].present? && params[:user_id].present?
-      user = User.find(params[:user_id])  # Buscar el usuario por el `user_id` recibido
+    if params[:event_picture].present? && params[:event_picture][:user_id].present? && params[:event_picture][:flyer_base64].present?
+      user = User.find(params[:event_picture][:user_id])
+      flyer_data = params[:event_picture][:flyer_base64]
+      content_type = flyer_data.match(%r{data:(.*?);base64})[1]
+      encoded_image = flyer_data.sub(%r{data:.*;base64,}, '')
+      decoded_image = Base64.decode64(encoded_image)
 
-      params[:flyers].each do |flyer|
-        picture = @event.event_pictures.new(user: user)  # Asociar el `picture` con el evento y el usuario
+      picture = @event.event_pictures.new(user: user)
+      picture.image.attach(io: StringIO.new(decoded_image), filename: "flyer_#{Time.now.to_i}.#{content_type.split('/').last}", content_type: content_type)
 
-        if picture.image.attach(flyer)
-          puts "Imagen adjuntada correctamente: #{picture.image.attached?}"
-          picture.save!
-          puts "Picture guardado con ID: #{picture.id}"
-        else
-          puts "Error al adjuntar la imagen: #{flyer.original_filename}"
-        end
+      if picture.save
+        render json: { id: picture.id, image_url: url_for(picture.image) }, status: :ok
+      else
+        render json: { error: 'Error al guardar la imagen' }, status: :unprocessable_entity
       end
-
-      # Devolver la lista de imágenes actualizada
-      pictures = @event.event_pictures.map do |picture|
-        { id: picture.id, image_url: picture.image.attached? ? url_for(picture.image) : nil }
-      end
-      render json: { event_id: @event.id, pictures: pictures }, status: :ok
     else
-      render json: { error: 'No se proporcionaron imágenes o usuario para subir' }, status: :unprocessable_entity
+      render json: { error: 'Parámetros incompletos' }, status: :unprocessable_entity
     end
   end
+
 
 
   private

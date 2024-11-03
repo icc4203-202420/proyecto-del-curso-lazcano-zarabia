@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import axiosInstance from '@/config/axiosInstance';
 
 interface Beer {
   id: string;
@@ -41,34 +42,32 @@ export default function index() {
     }
   };
 
+
   useEffect(() => {
     if (searchTerm) {
       setLoading(true);
       setError(null);
-
-      // Hacer las tres solicitudes a la API
+  
+      // Usar axiosInstance para las solicitudes
       Promise.all([
-        fetch(`http://127.0.0.1:3001/api/v1/beers`).then((response) => response.json()),
-        fetch(`http://127.0.0.1:3001/api/v1/users`).then((response) => response.json()),
-        fetch(`http://127.0.0.1:3001/api/v1/bars`).then((response) => response.json()),
+        axiosInstance.get('/api/v1/beers'),
+        axiosInstance.get('/api/v1/users'),
+        axiosInstance.get('/api/v1/bars'),
       ])
-        .then(([beersData, usersData, barsData]) => {
-          // Filtrar y estructurar los resultados de cervezas
-          const filteredBeers = beersData.beers
+        .then(([beersResponse, usersResponse, barsResponse]) => {
+          // Procesar los datos como antes
+          const filteredBeers = beersResponse.data.beers
             .filter((beer: any) => beer.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((beer: any) => ({ ...beer, type: 'beer' }));
-
-          // Filtrar y estructurar los resultados de usuarios
-          const filteredUsers = usersData.users
+  
+          const filteredUsers = usersResponse.data.users
             .filter((user: any) => user.handle.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((user: any) => ({ ...user, type: 'user' }));
-
-          // Filtrar y estructurar los resultados de bares
-          const filteredBars = barsData.bars
+  
+          const filteredBars = barsResponse.data.bars
             .filter((bar: any) => bar.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((bar: any) => ({ ...bar, type: 'bar' }));
-
-          // Combinar los resultados
+  
           setResults([...filteredBeers, ...filteredUsers, ...filteredBars]);
           setLoading(false);
         })
@@ -80,6 +79,8 @@ export default function index() {
       setResults([]);
     }
   }, [searchTerm]);
+  
+  
 
   return (
     <View style={styles.container}>

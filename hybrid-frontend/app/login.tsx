@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, ActivityIndicator, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useRouter } from 'expo-router';
 
+import axiosInstance from '../config/axiosInstance'; // Importa tu instancia de Axios
 import { storeToken } from '../storage/secureStore';
 
 const LoginSchema = Yup.object().shape({
@@ -19,33 +19,27 @@ export default function Login() {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-        const response = await fetch('http://127.0.0.1:3001/api/v1/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user: {
-                    email: values.email,
-                    password: values.password,
-                }
-            }),
-        });
+      // Usa axiosInstance para hacer la solicitud
+      const response = await axiosInstance.post('/api/v1/login', {
+        user: {
+          email: values.email,
+          password: values.password,
+        },
+      });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            //Usar SecureStore en lugar de AsyncStorage
-            await storeToken(data.status.data.token);
-            router.push('/'); // Redirigir al home
-        } else {
-            Alert.alert('Error en el login', data.message || 'Credenciales inválidas');
-        }
+      if (response.status === 200) {
+        // Usa SecureStore en lugar de AsyncStorage
+        await storeToken(response.data.status.data.token);
+        router.push('/'); // Redirigir al home
+      } else {
+        Alert.alert('Error en el login', response.data.message || 'Credenciales inválidas');
+      }
     } catch (error) {
-        Alert.alert('Error en el login', 'Ocurrió un error inesperado');
+      Alert.alert('Error en el login', 'Ocurrió un error inesperado');
+      console.error(error);
     }
     setLoading(false);
-};
+  };
 
   return (
     <Formik
