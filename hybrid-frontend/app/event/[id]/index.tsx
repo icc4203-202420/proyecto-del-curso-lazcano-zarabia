@@ -1,31 +1,64 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, Image, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, Image, FlatList, ActivityIndicator, Alert  } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 import axiosInstance from '@/config/axiosInstance';
 import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
 
 export default function EventDetail() {
   const [pictures, setPictures] = useState([]);
   const [uploading, setUploading] = useState(false);
   const { id } = useLocalSearchParams();
   const { userId } = useUser();
+
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchPictures();
+    fetchUsers();
   }, [id]);
 
   const fetchPictures = async () => {
     try {
       const response = await axiosInstance.get(`/api/v1/events/${id}/event_pictures`);
-      setPictures(response.data.pictures);
-      console.log("Pictures fetched successfully:", response.data.pictures);
+      const picturesData = response.data.pictures;
+
+      const picturesWithTags = await Promise.all(
+        picturesData.map(async (picture) => {
+          try {
+            const tagsResponse = await axiosInstance.get(
+              `/api/v1/events/${id}/event_pictures/${picture.id}/tags`
+            );
+            picture.tags = tagsResponse.data.tags;
+          } catch (error) {
+            console.error(`Error fetching tags for picture ${picture.id}:`, error);
+            picture.tags = []; 
+          }
+          return picture;
+        })
+      );
+
+      setPictures(picturesWithTags);
+      console.log("Pictures fetched successfully with tags:", picturesWithTags);
     } catch (error) {
       console.error('Error al obtener las imágenes:', error);
       Alert.alert('Error', 'No se pudo obtener las imágenes del evento');
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get('/api/v1/users'); // Adjust the endpoint as needed
+      setUsers(response.data.users);
+      console.log("Users fetched successfully:", response.data.users);
+    } catch (error) {
+      console.error('Error al obtener los usuarios:', error);
+      Alert.alert('Error', 'No se pudo obtener la lista de usuarios');
     }
   };
 
@@ -83,6 +116,29 @@ export default function EventDetail() {
     }
   };
 
+  const addTagToPicture = async (pictureId) => {
+    if (!selectedUserId) {
+      Alert.alert('Añadir Tag', 'Por favor selecciona un usuario.');
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post(`/api/v1/events/${id}/event_pictures/${pictureId}/tags`, {
+        user_id: selectedUserId,
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Failed to add tag, status: ${response.status}`);
+      }
+      fetchPictures(); 
+
+      Alert.alert('Añadir Tag', 'Usuario etiquetado correctamente.');
+    } catch (error) {
+      console.error('Error al etiquetar al usuario:', error);
+      Alert.alert('Añadir Tag', 'Error al etiquetar al usuario.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Fotos del Evento</Text>
@@ -103,11 +159,33 @@ export default function EventDetail() {
         data={pictures}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          item.image_url ? (
+          <View style={styles.imageContainer}>
             <Image source={{ uri: item.image_url }} style={styles.image} />
-          ) : (
-            <Text>Imagen no disponible</Text>
-          )
+
+            <Text style={styles.tagsTitle}>Tags:</Text>
+            {item.tags && item.tags.length > 0 ? (
+              item.tags.map((tag) => (
+                <Text key={tag.user_id} style={styles.tagHandle}>
+                  {tag.handle}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.noTags}>No tags</Text>
+            )}
+
+            <Picker
+              selectedValue={selectedUserId}
+              onValueChange={(value) => setSelectedUserId(value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Selecciona un usuario" value={null} />
+              {users.map((user) => (
+                <Picker.Item key={user.id} label={user.handle} value={user.id} />
+              ))}
+            </Picker>
+
+            <Button title="Añadir Tag" onPress={() => addTagToPicture(item.id)} />
+          </View>
         )}
       />
     </View>

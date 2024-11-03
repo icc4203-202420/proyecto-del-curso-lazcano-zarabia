@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "react-native-autocomplete-input": "^5.4.0"
+  }
+}
