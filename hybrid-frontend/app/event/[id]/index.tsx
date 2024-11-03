@@ -13,7 +13,7 @@ export default function EventDetail() {
   const { userId } = useUser();
 
   const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState("");
   
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -44,7 +44,6 @@ export default function EventDetail() {
       );
 
       setPictures(picturesWithTags);
-      console.log("Pictures fetched successfully with tags:", picturesWithTags);
     } catch (error) {
       console.error('Error al obtener las imágenes:', error);
       Alert.alert('Error', 'No se pudo obtener las imágenes del evento');
@@ -53,9 +52,8 @@ export default function EventDetail() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get('/api/v1/users'); // Adjust the endpoint as needed
+      const response = await axiosInstance.get('/api/v1/users'); 
       setUsers(response.data.users);
-      console.log("Users fetched successfully:", response.data.users);
     } catch (error) {
       console.error('Error al obtener los usuarios:', error);
       Alert.alert('Error', 'No se pudo obtener la lista de usuarios');
@@ -144,7 +142,6 @@ export default function EventDetail() {
       <Text style={styles.title}>Fotos del Evento</Text>
       <Button title="Escoger Imagen" onPress={chooseImage} />
 
-      {/* Muestra una previsualización de la imagen seleccionada */}
       {selectedImage && (
         <View style={styles.previewContainer}>
           <Text style={styles.previewText}>Previsualización:</Text>
@@ -178,11 +175,17 @@ export default function EventDetail() {
               onValueChange={(value) => setSelectedUserId(value)}
               style={styles.picker}
             >
-              <Picker.Item label="Selecciona un usuario" value={null} />
-              {users.map((user) => (
-                <Picker.Item key={user.id} label={user.handle} value={user.id} />
-              ))}
+              <Picker.Item label="Selecciona un usuario" value="" />
+              {users
+                .filter((user) => {
+                  const isTagged = item.tags.some((tag) => tag.user_id === user.id);
+                  return !isTagged; 
+                })
+                .map((user) => (
+                  <Picker.Item key={user.id} label={user.handle} value={user.id.toString()} />
+                ))}
             </Picker>
+
 
             <Button title="Añadir Tag" onPress={() => addTagToPicture(item.id)} />
           </View>

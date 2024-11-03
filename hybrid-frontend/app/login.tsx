@@ -19,7 +19,6 @@ export default function Login() {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      // Usa axiosInstance para hacer la solicitud
       const response = await axiosInstance.post('/api/v1/login', {
         user: {
           email: values.email,
@@ -28,9 +27,8 @@ export default function Login() {
       });
 
       if (response.status === 200) {
-        // Usa SecureStore en lugar de AsyncStorage
         await storeToken(response.data.status.data.token);
-        router.push('/'); // Redirigir al home
+        router.push('/'); 
       } else {
         Alert.alert('Error en el login', response.data.message || 'Credenciales inválidas');
       }
