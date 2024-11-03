@@ -16,12 +16,13 @@ export default function EventDetail() {
 
   useEffect(() => {
     fetchPictures();
-  }, [id, setPictures]);
+  }, [id]);
 
   const fetchPictures = async () => {
     try {
       const response = await axiosInstance.get(`/api/v1/events/${id}/event_pictures`);
       setPictures(response.data.pictures);
+      console.log("Pictures fetched successfully:", response.data.pictures);
     } catch (error) {
       console.error('Error al obtener las imágenes:', error);
       Alert.alert('Error', 'No se pudo obtener las imágenes del evento');
@@ -44,7 +45,7 @@ export default function EventDetail() {
 
     if (!result.cancelled) {
       setSelectedImage(result.assets[0]);
-      console.log("Set selected image done", result.assets[0]);
+      console.log("Selected image:", result.assets[0]);
     }
   };
 
@@ -56,7 +57,6 @@ export default function EventDetail() {
     setIsUploading(true);
 
     const base64Image = selectedImage.base64;
-    console.log("Base64 image", base64Image);
     const data = {
       event_picture: {
         user_id: userId,
@@ -101,7 +101,7 @@ export default function EventDetail() {
 
       <FlatList
         data={pictures}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           item.image_url ? (
             <Image source={{ uri: item.image_url }} style={styles.image} />
