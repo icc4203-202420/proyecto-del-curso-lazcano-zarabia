@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, Image, FlatList, ActivityIndicator, Alert  } from 'react-native';
+import { View, Text, StyleSheet, Button, Image, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useUser } from '@/context/UserContext';
 import axiosInstance from '@/config/axiosInstance';
@@ -11,22 +11,49 @@ export default function EventDetail() {
   const [uploading, setUploading] = useState(false);
   const { id } = useLocalSearchParams();
   const { userId } = useUser();
-
+  
+  const [endDate, setEndDate] = useState(null); // New state for end_date
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
-  
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [videoUrl, setVideoUrl] = useState(null);
 
   useEffect(() => {
     fetchPictures();
     fetchUsers();
+    fetchEventDetails();
+    fetchVideoUrl(); 
   }, [id]);
+
+  const fetchEventDetails = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/v1/events/${id}`);
+      const event = response.data;
+      setEndDate(event.end_date); // Store end_date as a Date object
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      Alert.alert('Error', 'No se pudo obtener los detalles del evento');
+    }
+  };
+
+  const fetchVideoUrl = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/v1/events/${id}/video_url`);
+      setVideoUrl(response.data.video_url); // Asigna la URL del video
+    } catch (error) {
+      console.error('Error al obtener la URL del video:', error);
+      Alert.alert('Error', 'No se pudo obtener la URL del video del evento');
+    }
+  };
 
   const fetchPictures = async () => {
     try {
       const response = await axiosInstance.get(`/api/v1/events/${id}/event_pictures`);
       const picturesData = response.data.pictures;
+
+      console.log('Pictures:', picturesData);
 
       const picturesWithTags = await Promise.all(
         picturesData.map(async (picture) => {
@@ -137,6 +164,28 @@ export default function EventDetail() {
     }
   };
 
+  const generateVideo = async () => {
+    try {
+      // Realiza una solicitud POST para generar el video
+      const response = await axiosInstance.post(`/api/v1/events/${id}/generate_video`);
+  
+      if (response.status === 200) {
+        Alert.alert('Video Generado', 'El video del evento ha sido generado con éxito.');
+      } else {
+        throw new Error(`Failed to generate video, status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error al generar el video:', error);
+      Alert.alert('Error', 'No se pudo generar el video del evento.');
+    }
+  };
+
+  const isButtonDisabled = () => {
+    if (!endDate) return true; 
+    const currentDate = new Date();
+    return currentDate <= endDate; 
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Fotos del Evento</Text>
@@ -158,7 +207,6 @@ export default function EventDetail() {
         renderItem={({ item }) => (
           <View style={styles.imageContainer}>
             <Image source={{ uri: item.image_url }} style={styles.image} />
-
             <Text style={styles.tagsTitle}>Tags:</Text>
             {item.tags && item.tags.length > 0 ? (
               item.tags.map((tag) => (
@@ -186,10 +234,15 @@ export default function EventDetail() {
                 ))}
             </Picker>
 
-
             <Button title="Añadir Tag" onPress={() => addTagToPicture(item.id)} />
           </View>
         )}
+      />
+
+      <Button
+        title="Generar Video"
+        onPress={generateVideo}
+        disabled={isButtonDisabled()}
       />
     </View>
   );
@@ -201,4 +254,9 @@ const styles = StyleSheet.create({
   image: { width: 200, height: 200, marginBottom: 10 },
   previewContainer: { marginTop: 20, alignItems: 'center' },
   previewText: { fontSize: 16, marginBottom: 10, fontWeight: 'bold' },
+  imageContainer: { marginBottom: 20 },
+  tagsTitle: { fontSize: 14, fontWeight: 'bold' },
+  tagHandle: { fontSize: 12, color: '#555' },
+  noTags: { fontSize: 12, fontStyle: 'italic', color: '#999' },
+  picker: { height: 50, width: '100%', marginTop: 10 },
 });

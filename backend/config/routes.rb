@@ -46,6 +46,7 @@ Rails.application.routes.draw do
         get :event_pictures
         member do
           post :add_images
+          post :generate_video
         end
         get 'event_pictures/:picture_id', to: 'events#display_picture', as: 'display_picture'
 

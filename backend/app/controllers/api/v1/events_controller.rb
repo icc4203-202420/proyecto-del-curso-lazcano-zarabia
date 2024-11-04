@@ -16,10 +16,22 @@ class API::V1::EventsController < ApplicationController
       name: @event.name,
       description: @event.description,
       date: @event.date,
+      end_date: @event.end_date,
       video_url: @event.video.attached? ? Rails.application.routes.url_helpers.rails_blob_url(@event.video, host: 'localhost', port: 3001) : nil
+
     }
 
     render json: event_data
+  end
+
+  def generate_video
+    event_id = params[:id]
+
+    if VideoGeneratorService.generate_video_for_event(event_id)
+      render json: { message: 'Video generado con éxito' }, status: :ok
+    else
+      render json: { error: 'No se pudo generar el video' }, status: :unprocessable_entity
+    end
   end
 
 
