@@ -9,7 +9,6 @@ interface UserProfile {
   first_name: string;
   handle: string;
   email: string;
-  // Agrega otros campos según el perfil de usuario
 }
 
 export default function Profile() {
@@ -17,25 +16,23 @@ export default function Profile() {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  // Función para obtener el perfil del usuario
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
         if (!token) {
           Alert.alert('Error', 'No se encontró el token de autenticación');
-          router.push('/login'); // Redirigir al login si no hay token
+          router.push('/login'); 
           return;
         }
 
-        // Usa axiosInstance para hacer la solicitud GET
         const response = await axiosInstance.get('/api/v1/users/me', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
 
-        setProfile(response.data); // Asumiendo que `response.data` contiene el perfil
+        setProfile(response.data); 
       } catch (error) {
         console.error('Error al obtener el perfil:', error);
         Alert.alert('Error', 'Ocurrió un error al obtener el perfil');
@@ -47,12 +44,11 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
-  // Función para cerrar sesión
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('authToken');
       Alert.alert('Sesión cerrada');
-      router.push('/login'); // Redirigir al login después de cerrar sesión
+      router.push('/login'); 
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       Alert.alert('Error', 'No se pudo cerrar la sesión');

@@ -32,42 +32,38 @@ export default function index() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Verificar si el usuario está autenticado
   const checkAuthentication = async () => {
     const token = await AsyncStorage.getItem('authToken');
     if (token) {
-      router.push('/profile'); // Redirige al perfil si está logueado
+      router.push('/profile'); 
     } else {
-      router.push('/login'); // Redirige al login si no está logueado
+      router.push('/login'); 
     }
   };
-
 
   useEffect(() => {
     if (searchTerm) {
       setLoading(true);
       setError(null);
-  
-      // Usar axiosInstance para las solicitudes
+
       Promise.all([
         axiosInstance.get('/api/v1/beers'),
         axiosInstance.get('/api/v1/users'),
         axiosInstance.get('/api/v1/bars'),
       ])
         .then(([beersResponse, usersResponse, barsResponse]) => {
-          // Procesar los datos como antes
           const filteredBeers = beersResponse.data.beers
             .filter((beer: any) => beer.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((beer: any) => ({ ...beer, type: 'beer' }));
-  
+
           const filteredUsers = usersResponse.data.users
             .filter((user: any) => user.handle.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((user: any) => ({ ...user, type: 'user' }));
-  
+
           const filteredBars = barsResponse.data.bars
             .filter((bar: any) => bar.name.toLowerCase().includes(searchTerm.toLowerCase()))
             .map((bar: any) => ({ ...bar, type: 'bar' }));
-  
+
           setResults([...filteredBeers, ...filteredUsers, ...filteredBars]);
           setLoading(false);
         })
@@ -79,8 +75,6 @@ export default function index() {
       setResults([]);
     }
   }, [searchTerm]);
-  
-  
 
   return (
     <View style={styles.container}>
@@ -104,7 +98,7 @@ export default function index() {
                   ? router.push(`/beer/${item.id}`)
                   : item.type === 'user'
                   ? router.push(`/user/${item.id}`)
-                  : router.push(`/bar/${item.id}`) // Ruta para los bares
+                  : router.push(`/bar/${item.id}`)
               }
             >
               <Text style={styles.item}>
@@ -118,8 +112,10 @@ export default function index() {
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      {/* Botón para ir al perfil o login */}
       <Button title="Ir a Perfil" onPress={checkAuthentication} />
+      
+      {/* Nuevo botón para ir al login */}
+      <Button title="Ir a Login" onPress={() => router.push('/login')} />
     </View>
   );
 }

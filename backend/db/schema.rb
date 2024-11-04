@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_29_223900) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_04_161504) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -140,17 +140,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223900) do
     t.index ["user_id"], name: "index_event_pictures_on_user_id"
   end
 
-  create_table "events", force: :cascade do |t|
-    t.string "name"
-    t.text "description"
-    t.datetime "date"
-    t.integer "bar_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.index ["bar_id"], name: "index_events_on_bar_id"
-  end
+# Could not dump table "events" because of following StandardError
+#   Unknown type '' for column 'video'
 
   create_table "friendships", force: :cascade do |t|
     t.integer "user_id", null: false
@@ -207,6 +198,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223900) do
     t.datetime "remember_created_at"
     t.string "jti", null: false
     t.string "handle"
+    t.string "notification_token"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["handle"], name: "index_users_on_handle", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true

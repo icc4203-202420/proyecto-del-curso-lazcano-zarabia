@@ -30,8 +30,12 @@ export default function BarDetail() {
   const { userId } = useUser();
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const [refresh, setRefresh] = useState(false);
+
 
   useEffect(() => {
+    console.log('SE EJECUTA EL USEEFFECT');
+    console.log('refresh', refresh);
     const fetchBarData = async () => {
       try {
         const response = await axiosInstance.get(`/api/v1/bars/${id}`);
@@ -78,11 +82,8 @@ export default function BarDetail() {
 
       if (response.status === 200) {
         Alert.alert('Asistencia confirmada', '¡Has confirmado tu asistencia a este evento!');
-        setEvents(prevEvents =>
-          prevEvents.map(event =>
-            event.id === eventId ? { ...event, checked_in: true } : event
-          )
-        );
+        //setRefresh(!refresh);
+        
       } else {
         Alert.alert('Error', 'No se pudo confirmar la asistencia');
       }
@@ -108,9 +109,7 @@ export default function BarDetail() {
 
       <Text style={styles.sectionTitle}>Eventos en este Bar</Text>
 
-      {eventsLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : bar?.events_count > 0 ? (
+      {bar?.events_count > 0 ? (
         <FlatList
           data={events}
           keyExtractor={(event) => event.id}
@@ -127,7 +126,9 @@ export default function BarDetail() {
               ) : (
                 <TouchableOpacity
                   style={styles.attendButton}
-                  onPress={() => confirmAttendance(item.id)}
+                  onPress={() => {
+                    confirmAttendance(item.id);
+                  }}
                 >
                   <Text style={styles.attendButtonText}>Confirmar Asistencia</Text>
                 </TouchableOpacity>
@@ -135,9 +136,10 @@ export default function BarDetail() {
             </View>
           )}
         />
-      ) : (
+        ) : (
         <Text style={styles.noEventsText}>No hay eventos programados para este bar.</Text>
-      )}
+        )}
+
 
       <Button title="Volver a Inicio" onPress={() => router.push('/')} />
     </View>

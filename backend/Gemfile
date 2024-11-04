@@ -65,3 +65,7 @@ gem 'pry', '~> 0.14.2'
 gem 'pundit'
 
 gem 'pg'
+
+gem 'fcm'
+
+gem 'ruby-vips'

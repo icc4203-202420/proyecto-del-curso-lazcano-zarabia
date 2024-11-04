@@ -8,8 +8,20 @@ class API::V1::EventsController < ApplicationController
   end
 
   def show
-    render json: @event
+    @event = Event.find(params[:id])
+
+    # Serializar selectivamente los atributos que necesitas
+    event_data = {
+      id: @event.id,
+      name: @event.name,
+      description: @event.description,
+      date: @event.date,
+      video_url: @event.video.attached? ? Rails.application.routes.url_helpers.rails_blob_url(@event.video, host: 'localhost', port: 3001) : nil
+    }
+
+    render json: event_data
   end
+
 
   def events_with_attendance
     bar = Bar.find_by(id: params[:id])
@@ -138,6 +150,9 @@ class API::V1::EventsController < ApplicationController
       render json: { error: 'Parámetros incompletos' }, status: :unprocessable_entity
     end
   end
+
+
+
 
 
 
