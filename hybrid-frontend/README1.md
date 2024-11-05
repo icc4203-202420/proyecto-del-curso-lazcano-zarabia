@@ -1,0 +1,2 @@
+Hay que hacer, un bundle install, migraciones e instalar sudo apt-get install ffmpeg en wsl (en mac es diferente)
+el backend esta funcionando con ngrok asique hay que configurar eso, en la carpeta de hybrid-frontend/config/axiosInstance.ts ahi se pone el link que entrega ngrok
