@@ -15,8 +15,14 @@ class VideoGeneratorService
       end
 
       image = MiniMagick::Image.open(file_path)
-      image.resize "1920x1080" if image.width > 1920 || image.height > 1080
-      image.write(file_path)
+      #puts "Imagen: #{path}, Tamaño: #{image.width}x#{image.height}"
+
+      if image.valid?
+        image.resize "1920x1080" if image.width > 1920 || image.height > 1080
+        image.write(file_path)
+      else
+        puts "Imagen inválida en: #{file_path}"
+      end
 
       image_paths << file_path
     end
@@ -31,8 +37,8 @@ class VideoGeneratorService
     video_url = Rails.application.routes.url_helpers.rails_blob_url(event.video, host: 'localhost', port: 3001)
 
     # Limpiar los archivos temporales
-    image_paths.each { |path| File.delete(path) }
-    File.delete(output_video_path)
+    # image_paths.each { |path| File.delete(path) }
+    # File.delete(output_video_path)
 
     video_url
   end
